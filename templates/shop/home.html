@@ -1,0 +1,28 @@
+{% extends 'base.html' %}
+{% block content %}
+
+    <div class="context">
+        <div class="row">
+            
+            {% for product, product_image in combined %}
+                <div class="col">
+                    <div class="card" style="width: 18rem;">
+                        <img src="{{product_image.image.url}}" class="card-img-top" >
+                        <div class="card-body">
+                            
+                            <p class="card-text">{{product.name}}</p>
+                            <ul class="list-group list-group-flush">
+                                <li class="list-group-item">An item</li>
+                                
+                            </ul>
+                            <a href="{% url 'product' product.pk %}" class="btn btn-primary">Go </a>
+                        </div>
+                    </div>
+                </div>  
+            {% endfor %}
+
+        </div>
+    </div>
+    
+
+{% endblock %}
