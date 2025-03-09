@@ -1,10 +1,11 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser
+from django.contrib.auth.models import AbstractUser, User
 from django.core.exceptions import ValidationError
 from cloudinary.models import CloudinaryField
 import cloudinary.api
 from django.core.files.uploadedfile import UploadedFile
-from django.contrib.auth.models import Group
+from django.contrib.auth.models import Group, Permission
+from IntenterShop_system import settings
 
 
 # Create your models here.
@@ -34,3 +35,14 @@ def file_validation(file):
             raise ValidationError("File shouldn't be larger than 10MB.")
 
 
+class CustomUser(AbstractUser):
+    photo = CloudinaryField('image', validators=[file_validation])
+    adress = models.CharField(max_length=100)
+    phone_number = models.CharField(max_length=20)
+
+
+class MagazineProfile(AbstractUser):
+    logo = CloudinaryField('image', validators=[file_validation])
+    description = models.TextField()
+    groups = models.ManyToManyField(Group, related_name='magazine_set', blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name='magazine_set', blank=True)
