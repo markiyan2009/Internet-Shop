@@ -57,7 +57,4 @@ class ProductDetailView(DetailView):
         context['reviews'] = context['product'].reviews.all()
 
 
-
-
-
         return context   

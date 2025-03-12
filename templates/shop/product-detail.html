@@ -18,7 +18,7 @@
                     {% for img in imgs %}
                         <div class="carousel-item active" data-bs-interval="10000">
                            
-                            <img src="{{img.image.url}}" class="d-block w-100">
+                            <img src="{{img.image.url}}"  class="d-block w-100 ">
                         </div>
                     {% endfor %}
                   
@@ -44,16 +44,64 @@
             <div class="characteristics p-description">
                 <h3>Characteristics</h3>
                 <p>{{product.character}}</p>
+            </div>  
+            <div class="row">
+
+                
+                <div class="col-5" style="margin-top: 20px;">
+        
+                    <h1 class='price p-description' ><b>{{product.price}}</b>₴</h1>
+                </div>
+               
+
+                <div class="col" style="margin-top: 20px;">
+                    <div class="buy">
+                        <button type="button" class="btn btn-lg btn-primary" data-bs-toggle="modal" data-bs-target="#exampleModal">
+                            To basket
+                        </button>
+                        
+                        <!-- Modal -->
+                            <div class="modal fade" id="exampleModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+                                <div class="modal-dialog">
+                                    <div class="modal-content">
+                                        <div class="modal-header">
+                                            <h1 class="modal-title fs-5" id="exampleModalLabel">Modal title</h1>
+                                            <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                                        </div>
+                                        <div class="modal-body">
+                                            <div class="row">
+                                                <div class="col">
+                                                    {% for img in imgs %}
+                                                        {% if img.is_primary %}
+                                                            <img src="{{img.image.url}}" id="img_modal" alt="" class="img-fluid">
+                                                        {%endif%}
+                                                    {% endfor %}
+                                                </div>
+
+                                                <div class="col">
+                                                    
+                                                    <h3>{{product.price}}<b>₴</b></h3>
+                                                    <br>
+                                                    <div class="btn-group" role="group" aria-label="Basic example">
+                                                        <button type="button" class="btn border border-secondary number-border">-</button>
+                                                        <button type="button" id='number-product' class="btn btn-primary">1</button>
+                                                        <button type="button" class="btn border border-secondary number-border">+</button>
+                                                    </div>
+                                                    
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div class="modal-footer">
+                                            <a href=""><button type="button" class="btn btn-primary">Add to basket</button></a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                    </div>
+                </div>
             </div>
         </div>
 
-    </div>
-
-    <div class="row">
-        <div class="col-3" style="margin-top: 20px;">
-            
-            <h1 class='price'><b>{{product.price}}</b>₴</h1>
-        </div>
     </div>
 
     <!-- rewievs -->
@@ -66,5 +114,9 @@
 
 
 </div>
+
+<script>
+
+</script>
 
 {% endblock %}

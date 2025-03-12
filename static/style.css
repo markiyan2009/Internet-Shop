@@ -4,3 +4,12 @@
 .p-description{
     padding-left: 100px;
 }
+
+#img_modal{
+    width: 200px; /* Ширина на твій вибір */
+    height: 250px; /* Висота на твій вибір */
+    object-fit: cover; /* Щоб обрізати зайве */
+}
+.number-border:hover{
+    border: none;
+}
