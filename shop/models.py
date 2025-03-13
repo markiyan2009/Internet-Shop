@@ -85,10 +85,15 @@ class Reviews(models.Model):
 
 class Baskets(models.Model):
     user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Products)
+    
 
     def __str__(self):
         return self.user.username
+
+class ItemBasket(models.Model):
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='item_basket')
+    basket = models.ForeignKey(Baskets, on_delete=models.CASCADE)
+
 
 class Discounts(models.Model):
 
