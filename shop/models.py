@@ -1,11 +1,11 @@
 from django.db import models
-
+from django.contrib.auth.models import User
 from cloudinary.models import CloudinaryField
 import cloudinary.api
 from django.core.files.uploadedfile import UploadedFile
 from django.core.exceptions import ValidationError
 from PIL import Image 
-from IntenterShop_system.settings import AUTH_USER_MODEL
+
 
 cloudinary.config( 
     cloud_name = "den9yj6z5", 
@@ -40,9 +40,9 @@ class Categories(models.Model):
 
 class Comment(models.Model):
     text = models.TextField()
-    author = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
-    likes = models.ManyToManyField(AUTH_USER_MODEL, blank=True, related_name='likes')
-    dislikes = models.ManyToManyField(AUTH_USER_MODEL, blank=True, related_name='dislikes')
+    author = models.ForeignKey(User, on_delete=models.CASCADE)
+    likes = models.ManyToManyField(User, blank=True, related_name='likes')
+    dislikes = models.ManyToManyField(User, blank=True, related_name='dislikes')
     date = models.DateTimeField(auto_now=True)
 
     def __str__(self):
@@ -73,7 +73,7 @@ class ProductImages(models.Model):
     
 
 class Reviews(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='reviews')
     rating = models.IntegerField()
     comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
@@ -84,7 +84,7 @@ class Reviews(models.Model):
         return self.user.username
 
 class Baskets(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     products = models.ManyToManyField(Products)
 
     def __str__(self):
@@ -114,7 +114,7 @@ class Orders(models.Model):
         ['Отримано' ,'received']
     ]
 
-    user = models.ForeignKey(AUTH_USER_MODEL, models.CASCADE)
+    user = models.ForeignKey(User, models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES)
     total_price = models.IntegerField()
@@ -122,7 +122,7 @@ class Orders(models.Model):
     def __str__(self):
         return self.user.username
 class OrderItems(models.Model):
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
     order = models.ForeignKey(Orders, on_delete=models.CASCADE)
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
     quantity = models.IntegerField()

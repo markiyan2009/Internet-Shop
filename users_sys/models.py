@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import AbstractUser, User
+from django.contrib.auth.models import User
 from django.core.exceptions import ValidationError
 from cloudinary.models import CloudinaryField
 import cloudinary.api
@@ -35,14 +35,16 @@ def file_validation(file):
             raise ValidationError("File shouldn't be larger than 10MB.")
 
 
-class CustomUser(AbstractUser):
+class CustomerProfile(models.Model):
     photo = CloudinaryField('image', validators=[file_validation])
     adress = models.CharField(max_length=100)
     phone_number = models.CharField(max_length=20)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='customer_profile')
 
 
-class MagazineProfile(AbstractUser):
+class ShopProfile(models.Model):
     logo = CloudinaryField('image', validators=[file_validation])
     description = models.TextField()
-    groups = models.ManyToManyField(Group, related_name='magazine_set', blank=True)
-    user_permissions = models.ManyToManyField(Permission, related_name='magazine_set', blank=True)
+    groups = models.ManyToManyField(Group, related_name='shop_set', blank=True)
+    user_permissions = models.ManyToManyField(Permission, related_name='shop_set', blank=True)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='shop_profile')

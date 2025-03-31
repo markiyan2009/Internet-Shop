@@ -39,6 +39,7 @@ class HomeView(ListView):
             print(products_images)
         context['products_images'] = products_images
         context['combined'] = zip_lists(products, products_images)
+        print(self.request.user)
         return context
     
 class ProductDetailView(DetailView):
