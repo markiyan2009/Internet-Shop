@@ -11,7 +11,8 @@ from django.contrib.auth import login
 class RegisterView(CreateView):
     form_class = RegisterForm
     template_name = 'users_sys/register.html'
-    success_url = reverse_lazy('home')
+
+    
     
    
 
@@ -19,3 +20,4 @@ class LoginUserView(LoginView):
     form_class = LoginUserForm
     template_name = 'users_sys/login.html'
     success_url = reverse_lazy('home')
+
