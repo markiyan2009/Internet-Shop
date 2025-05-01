@@ -1,0 +1,33 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="context">
+        <div class="row">
+            <h2>Деталі замовлення</h2>
+            <h4>Номер замовлення</h4>
+            <h5>{{order.status}}</h5>
+        </div>
+        
+        {% for product, product_image in combined %}
+
+            <div class="row">
+            <div class="card mb-3" style="max-width: 540px;">
+                <div class="row g-0">
+                    <div class="col-md-4">
+                    <img src="{{product_image.image.url}}" class="img-fluid rounded-start" alt="...">
+                    </div>
+                    <div class="col-md-8">
+                    <div class="card-body">
+                        <h5 class="card-title">{{product.name}}</h5>
+                    </div>
+                    </div>
+                </div>
+                </div>
+            </div>
+        {% endfor %}
+        <div class="row">
+            <h3>Ціна:{{order.total_price}}</h3>
+        </div>
+    </div>
+    
+{% endblock %}

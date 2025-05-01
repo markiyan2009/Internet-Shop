@@ -130,4 +130,26 @@ class OrderItemsListView(ListView):
     template_name = 'shop/order_items.html'
     context_object_name = 'order_items'
 
-    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        order = Orders.objects.filter(pk = self.kwargs['order_pk']).first()
+        context['order'] = order
+        products = []
+        for item in context['order_items']:
+            products.append(item.product)
+        print(products)
+        products_images = []
+        for product in products:
+            
+            imgs = product.product_images.all()
+            
+            for img in imgs:
+                
+                if img.is_primary:
+                    products_images.append(img)
+                    
+        
+        context['combined'] = zip_lists(products, products_images)
+
+        return context
