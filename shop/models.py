@@ -85,11 +85,21 @@ class Reviews(models.Model):
         return self.user.username
 
 class Baskets(models.Model):
+<<<<<<< HEAD
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='basket')
     products = models.ManyToManyField(Products, related_name='basket')
+=======
+    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
+    
+>>>>>>> e2b2a587aaf591d6a728152042c6335ac5bd2e3c
 
     def __str__(self):
         return self.user.username
+
+class ItemBasket(models.Model):
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='item_basket')
+    basket = models.ForeignKey(Baskets, on_delete=models.CASCADE)
+
 
 class Discounts(models.Model):
 
