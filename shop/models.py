@@ -4,7 +4,8 @@ from cloudinary.models import CloudinaryField
 import cloudinary.api
 from django.core.files.uploadedfile import UploadedFile
 from django.core.exceptions import ValidationError
-from PIL import Image 
+from PIL import Image
+from users_sys.models import ShopProfile, CustomerProfile 
 
 
 cloudinary.config( 
@@ -55,7 +56,7 @@ class Products(models.Model):
     availability = models.BooleanField()
     character = models.TextField(default='')
     description = models.TextField(default='')
-    # magazine = models.ForeignKey(MagazineProfile, on_delete=models.CASCADE, null=True)
+    shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE, null=True)
 
     def __str__(self):
         return self.name
@@ -84,8 +85,8 @@ class Reviews(models.Model):
         return self.user.username
 
 class Baskets(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    products = models.ManyToManyField(Products)
+    user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='basket')
+    products = models.ManyToManyField(Products, related_name='basket')
 
     def __str__(self):
         return self.user.username
@@ -108,24 +109,25 @@ class Discounts(models.Model):
 
 class Orders(models.Model):
     STATUS_CHOICES = [
-        ['Замовлення оформлено','framed'],
-        ['Доставляється', 'transit' ],
-        ['Доставлено', 'delivered'],
-        ['Отримано' ,'received']
+        ['framed','Замовлення оформлено'],
+        ['transit', 'Доставляється' ],
+        ['delivered', 'Доставлено'],
+        ['received' ,'Отримано'],
+        ['canceled', 'Скасовано'],
     ]
 
     user = models.ForeignKey(User, models.CASCADE)
     date = models.DateTimeField(auto_now=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-    total_price = models.IntegerField()
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='framed')
+    total_price = models.IntegerField(blank=True, null=True)
 
     def __str__(self):
         return self.user.username
 class OrderItems(models.Model):
-    user = models.ForeignKey(User, on_delete=models.CASCADE)
-    order = models.ForeignKey(Orders, on_delete=models.CASCADE)
+    
+    order = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name='order_items')
     product = models.ForeignKey(Products, on_delete=models.CASCADE)
-    quantity = models.IntegerField()
+    quantity = models.IntegerField(default=1)
 
     def __str__(self):
         return self.user.username

@@ -1,0 +1,22 @@
+{%extends 'base.html'%}
+
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <div class="col-5">
+            <img src="{{profile.photo.url}}">
+        </div>
+        <div class="col-7">
+            <div class="row">
+                <h2>{{profile.name}}</h2>
+            </div>
+            <div class="row">
+                Phone number
+                <p>{{profile.phone_number}}</p>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

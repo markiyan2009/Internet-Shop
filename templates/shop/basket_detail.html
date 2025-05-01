@@ -1,0 +1,58 @@
+{% extends 'base.html' %}
+
+{% block content %}
+<div class="container">
+    <h1>Basket</h1>
+
+    {% for product, product_image in combined %}
+
+        <div class="row">
+          <div class="card mb-3" style="max-width: 540px;">
+              <div class="row g-0">
+                <div class="col-md-4">
+                  <img src="{{product_image.image.url}}" class="img-fluid rounded-start" alt="...">
+                </div>
+                <div class="col-md-8">
+                  <div class="card-body">
+                    <h5 class="card-title">{{product.name}}</h5>
+                    <div class="btn-group" role="group" aria-label="Basic example">
+                        <button type="button" class="btn border border-secondary number-border">-</button>
+                        <button type="button" id='number-product' class="btn btn-primary">1</button>
+                        <button type="button" class="btn border border-secondary number-border">+</button>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+        </div>
+    {% endfor %}
+
+    <div class="row">
+        
+        <button type="button" class="btn btn-success" data-bs-toggle="modal" data-bs-target="#staticBackdrop">
+            Order
+        </button>
+        
+        <!-- Modal -->
+        <div class="modal fade" id="staticBackdrop" data-bs-backdrop="static" data-bs-keyboard="false" tabindex="-1" aria-labelledby="staticBackdropLabel" aria-hidden="true">
+          <div class="modal-dialog">
+            <div class="modal-content">
+              <div class="modal-header">
+                <h1 class="modal-title fs-5" id="staticBackdropLabel">Замовлення</h1>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+              </div>
+              <div class="modal-body">
+                Ви дійсно хочете замовити всі продукти, що в кошику? <br>
+                
+              </div>
+              <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <a href="{% url 'create_order'  %}"><button type="button" class="btn btn-primary">Зробити замовлення</button></a>
+              </div>
+            </div>
+          </div>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

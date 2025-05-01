@@ -20,11 +20,11 @@ class RegisterForm(UserCreationForm):
     username = forms.CharField(widget=forms.TextInput(attrs={'class': 'form-input'}))
     password1 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input'}))
     password2 = forms.CharField(widget=forms.PasswordInput(attrs={'class': 'form-input'}))
-    is_magazine = forms.BooleanField(label='Чи це магазин?')
+    is_shop = forms.BooleanField(label='Чи це магазин?', initial=False, required=False)
 
     class Meta:
         model = get_user_model()
-        fields = ['username', 'password1', 'password2']
+        fields = ['username', 'password1', 'password2', 'is_shop']
 
 class ShopProfileForm(forms.ModelForm):
     class Meta:
