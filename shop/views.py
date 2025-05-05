@@ -6,6 +6,12 @@ from django.views.generic import ListView, DetailView, CreateView, DeleteView, U
 from django import http, template
 from shop.mixins import *
 from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRedirect
+from django.contrib.auth.mixins import PermissionRequiredMixin
+from .forms import UpdateOrderStatusForm
+from django import template
+from django.contrib.auth.decorators import permission_required
+
+
 
 # Create your views here.
 
@@ -14,6 +20,10 @@ register = template.Library()
 @register.filter
 def zip_lists(a, b):
     return zip(a, b)
+
+@register.filter(name='has_group')
+def has_group(user, group_name):
+    return user.groups.filter(name=group_name).exists()
 
 class HomeView(ListView):
     model = Products
@@ -64,7 +74,8 @@ class ProductDetailView(DetailView):
 
         return context   
     
-class BusketDetailView(DetailView):
+class BusketDetailView(PermissionRequiredMixin, DetailView):
+    permission_required = 'shop.view_baskets'
     model = Baskets
     template_name = 'shop/basket_detail.html'
     context_object_name = 'basket'
@@ -90,7 +101,9 @@ class BusketDetailView(DetailView):
 
         return context
 
-class AddProductToBusketView(View):
+class AddProductToBusketView(PermissionRequiredMixin, View):
+
+    @permission_required('add_product_to_busket', raise_exception=True)
     def get(self, request, pk, *args, **kwargs):
         
         basket = request.user.basket
@@ -101,7 +114,8 @@ class AddProductToBusketView(View):
         
         return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs={'pk' : basket.pk}))
 
-class CreateOrderView(View):
+class CreateOrderView(PermissionRequiredMixin, View):
+    @permission_required('add_orders', raise_exception=True)
     def get(self, request, *args, **kwargs):
         basket = request.user.basket
         products = basket.products.all()
@@ -115,18 +129,22 @@ class CreateOrderView(View):
             order_item.save()
             total_price += product.price * quantity
             order.order_items.add(order_item)
+            
         
         order.total_price = total_price
         order.save()
+        basket.products.clear()
         
         return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs = {'pk':basket.pk}))
         
-class OrdersListView(ListView):
+class OrdersListView(PermissionRequiredMixin, ListView):
+    permission_required = 'shop.view_orders'
     template_name = 'shop/orders.html'
     context_object_name = 'orders'
     model = Orders
         
-class OrderItemsListView(ListView):
+class OrderItemsListView(PermissionRequiredMixin, ListView):
+    permission_required = 'shop.view_orderitems'
     model = OrderItems
     template_name = 'shop/order_items.html'
     context_object_name = 'order_items'
@@ -134,12 +152,18 @@ class OrderItemsListView(ListView):
     def get_context_data(self, **kwargs):
         context = super().get_context_data(**kwargs)
 
+        
+
         order = Orders.objects.filter(pk = self.kwargs['order_pk']).first()
         context['order'] = order
+
+        context['order_items'] = OrderItems.objects.filter(order = order).all()
+
         products = []
         for item in context['order_items']:
             products.append(item.product)
-        print(products)
+
+        
         products_images = []
         for product in products:
             
@@ -154,3 +178,9 @@ class OrderItemsListView(ListView):
         context['combined'] = zip_lists(products, products_images)
 
         return context
+    
+class UpdateOrderStatusView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'shop.update_order'
+    form_class = UpdateOrderStatusForm
+    template_name = 'shop/update_order_status.html'
+    model = Orders

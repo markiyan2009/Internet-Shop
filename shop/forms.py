@@ -1,7 +1,7 @@
 from django import forms
-from .models import Products
+from .models import *
 
-class AddToCartForm(forms.ModelForm):
-    model = Products
-    #модель айтема кошику, реєстрація і логін
-    fields = ['']
+class UpdateOrderStatusForm(forms.ModelForm):
+    class Meta:
+        model = Orders
+        fields = ['status']

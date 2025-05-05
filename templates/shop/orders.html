@@ -1,5 +1,7 @@
 {% extends 'base.html' %}
 
+
+
 {% block content %}
     {% for order in orders %}
     <div class="card">
@@ -8,6 +10,9 @@
           <h5 class="card-title">{{order.status}}</h5>
           
           <a href="{% url 'order_items_list' order.pk %}" class="btn btn-primary">Переглянути замовлення</a>
+          
+            <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Оновити статус</a>
+          
         </div>
       </div>
     {% endfor %}

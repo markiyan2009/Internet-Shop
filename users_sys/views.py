@@ -10,6 +10,7 @@ from django.contrib.auth import login
 from users_sys import models
 from shop import models as shop_models
 from django.contrib.auth.models import Group
+from django.contrib.auth.mixins import PermissionRequiredMixin
 
 customer_group = Group.objects.get(name='customer') 
 shop_group = Group.objects.get(name='magazine') 
@@ -56,7 +57,8 @@ class LoginUserView(LoginView):
     success_url = reverse_lazy('home')
 
 
-class CreateShopProfileView(CreateView):
+class CreateShopProfileView(PermissionRequiredMixin, CreateView):
+    permission_required = 'users_sys.add_shopprofile'
     form_class = ShopProfileForm
     template_name = 'users_sys/profile_create.html'
     success_url = reverse_lazy('home')
@@ -67,7 +69,8 @@ class CreateShopProfileView(CreateView):
         form.save()
         return super().form_valid(form)
     
-class CreateCustomerProfileView(CreateView):
+class CreateCustomerProfileView(PermissionRequiredMixin, CreateView):
+    permission_required = 'users_sys.add_customerprofile'
     form_class = CustomerProfileForm
     template_name = 'users_sys/profile_create.html'
     success_url = reverse_lazy('home')
@@ -78,7 +81,8 @@ class CreateCustomerProfileView(CreateView):
       
         return super().form_valid(form)
     
-class DetailShopProfileView(DetailView):
+class DetailShopProfileView(PermissionRequiredMixin, DetailView):
+    permission_required = 'users_sys.view_shopprofile'
     model = models.ShopProfile
     template_name = 'users_sys/detail_shop_profile.html'
     context_object_name = 'profile'
@@ -88,8 +92,9 @@ class DetailShopProfileView(DetailView):
         print(self.request.user.shop_profile.pk)
         return context
 
-class DetailCustomerProfileView(DetailView):
+class DetailCustomerProfileView(PermissionRequiredMixin, DetailView):
+    permission_required = 'users_sys.view_customerprofile'
     model = models.CustomerProfile
     template_name = 'users_sys/detail_customer_profile.html'
     context_object_name = 'profile'
-    
+

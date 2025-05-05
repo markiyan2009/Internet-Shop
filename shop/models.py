@@ -85,13 +85,14 @@ class Reviews(models.Model):
         return self.user.username
 
 class Baskets(models.Model):
-<<<<<<< HEAD
+
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='basket')
     products = models.ManyToManyField(Products, related_name='basket')
-=======
-    user = models.ForeignKey(AUTH_USER_MODEL, on_delete=models.CASCADE)
-    
->>>>>>> e2b2a587aaf591d6a728152042c6335ac5bd2e3c
+
+    class Meta:
+        permissions = [
+            ('add_product_to_busket', 'Add product to busket'),
+        ]
 
     def __str__(self):
         return self.user.username
@@ -125,7 +126,7 @@ class Orders(models.Model):
         ['received' ,'Отримано'],
         ['canceled', 'Скасовано'],
     ]
-
+    
     user = models.ForeignKey(User, models.CASCADE)
     date = models.DateTimeField(auto_now=True)
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='framed')
