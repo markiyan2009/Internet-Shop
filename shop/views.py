@@ -1,5 +1,5 @@
 from typing import Any, Dict
-from django.shortcuts import render
+from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from shop.models import * 
 from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, View
@@ -7,9 +7,10 @@ from django import http, template
 from shop.mixins import *
 from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRedirect
 from django.contrib.auth.mixins import PermissionRequiredMixin
-from .forms import UpdateOrderStatusForm
+from . import forms
 from django import template
 from django.contrib.auth.decorators import permission_required
+from django.utils.decorators import method_decorator
 
 
 
@@ -48,11 +49,7 @@ class HomeView(ListView):
                     
             print(products_images)
         context['combined'] = zip_lists(products, products_images)
-        # if self.request.user.customer_profile is not None:
-        #     print('customer')
-        # if self.request.user.shop_profile is not None:
-        #     print('huy')
-
+        
         return context
     
 class ProductDetailView(DetailView):
@@ -102,8 +99,9 @@ class BusketDetailView(PermissionRequiredMixin, DetailView):
         return context
 
 class AddProductToBusketView(PermissionRequiredMixin, View):
-
-    @permission_required('add_product_to_busket', raise_exception=True)
+    permission_required = 'shop.add_product_to_busket'
+    
+   
     def get(self, request, pk, *args, **kwargs):
         
         basket = request.user.basket
@@ -115,7 +113,8 @@ class AddProductToBusketView(PermissionRequiredMixin, View):
         return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs={'pk' : basket.pk}))
 
 class CreateOrderView(PermissionRequiredMixin, View):
-    @permission_required('add_orders', raise_exception=True)
+    permission_required = 'shop.add_orders'
+    
     def get(self, request, *args, **kwargs):
         basket = request.user.basket
         products = basket.products.all()
@@ -180,7 +179,48 @@ class OrderItemsListView(PermissionRequiredMixin, ListView):
         return context
     
 class UpdateOrderStatusView(PermissionRequiredMixin, UpdateView):
-    permission_required = 'shop.update_order'
-    form_class = UpdateOrderStatusForm
+    permission_required = 'shop.change_orders'
+    form_class = forms.UpdateOrderStatusForm
     template_name = 'shop/update_order_status.html'
     model = Orders
+    
+    def get_success_url(self) -> str:
+        return reverse_lazy('orders_manager', kwargs = {'user_pk':self.request.user.pk})
+    
+      
+
+
+class CreateReviewView(CreateView):
+    permission_required = 'shop.can_add_review'
+    form_class = forms.CreateReviewForm
+    model = Reviews
+    template_name = 'shop/create_review.html'
+    
+
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+
+        context['comment_form'] = forms.CreateCommentForm()
+
+        return context
+    def post(self, request, *args, **kwargs):
+        comment_form = forms.CreateCommentForm(request.POST, request.FILES)
+        review_form = forms.CreateReviewForm(request.POST, request.FILES)
+        if comment_form.is_valid() and review_form.is_valid():
+            comment = comment_form.save(commit=False)
+            review = review_form.save(commit=False)
+            
+            review.user = request.user
+            comment.author = request.user
+            review.product = Products.objects.filter(pk = self.kwargs['product_pk']).first()
+            review.comment = comment
+            comment.save()
+            review.save()
+
+        return redirect('product', pk = self.kwargs['product_pk'])
+
+class OrderListManagerView(PermissionRequiredMixin, ListView):
+    permission_required = 'shop.change_orders'
+    template_name = 'shop/orders_manager.html'
+    model = Orders
+    context_object_name = 'orders'  

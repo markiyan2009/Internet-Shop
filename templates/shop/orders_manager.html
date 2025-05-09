@@ -1,0 +1,27 @@
+{% extends 'base.html' %}
+
+{% block content %}
+    <div class="container">
+        {% for order in orders %}
+        <div class="row">
+            <div class="container">
+                <div class="card">
+                    <h5 class="card-header">Номер замовлення</h5></div>
+
+                    <div class="card-body">
+
+                    
+                    <h5 class="card-title">{{order.status}}</h5>
+                    <p class="card-text"> {{order.user.name}} </p>
+                    <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Змінити статус</a>
+                    {% if perms.shop.change_orders %}
+                        <!-- <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Оновити статус</a> -->
+                    {% endif %}
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        {% endfor %}
+    </div>
+{% endblock %}

@@ -6,6 +6,7 @@ from django.core.files.uploadedfile import UploadedFile
 from django.core.exceptions import ValidationError
 from PIL import Image
 from users_sys.models import ShopProfile, CustomerProfile 
+from django.core.validators import MinValueValidator, MaxValueValidator
 
 
 cloudinary.config( 
@@ -76,11 +77,15 @@ class ProductImages(models.Model):
 class Reviews(models.Model):
     user = models.ForeignKey(User, on_delete=models.CASCADE)
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='reviews')
-    rating = models.IntegerField()
-    comment = models.ForeignKey(Comment, on_delete=models.CASCADE)
+    rating = models.IntegerField(validators=[MinValueValidator(1), MaxValueValidator(5)])
+    comment = models.ForeignKey(Comment, on_delete=models.CASCADE, related_name='review')
     date = models.DateTimeField(auto_now=True)
 
-    
+    class Meta:
+        permissions = [
+            ('add_review_who_but_it', 'Add review who buy it'),
+        ]
+
     def __str__(self):
         return self.user.username
 

@@ -113,8 +113,28 @@
    <h1>Reviews</h1>
    <div class="row">
         <div class="container">
+
+            {% for review in reviews %}
+            <div class="row">
+
+                <div class="container">
+                    <div class="row">
+                        Raiting: {{review.rating}}
+                    </div>
+                    <div class="row">
+                        <p>{{review.comment.text}}</p>
+                    </div>
+                </div>
+                
+            </div>
+            {% endfor %}
             
+            <div class="row">
+                <a href="{% url 'add_review' product.pk %}">Add review</a>
+            </div>
         </div>
+
+
    </div>
 
 
