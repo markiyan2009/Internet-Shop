@@ -165,5 +165,6 @@ class CreateDiscountView(CreateView):
         form.instance.product = product
         discount = form.save()
         product.discount = discount
+        
         product.save()
         return super().form_valid(form)

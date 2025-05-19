@@ -98,7 +98,9 @@ class CreateOrderView(PermissionRequiredMixin, View):
         for product in products:
             order_item = OrderItems(order = order, product = product, quantity = quantity)
             order_item.save()
-            total_price += product.price * quantity
+            if product.discount:
+
+                total_price += product.price_with_discount * quantity
             order.order_items.add(order_item)
             
         

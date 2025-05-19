@@ -9,6 +9,7 @@ from users_sys.models import ShopProfile, CustomerProfile
 from django.core.validators import MinValueValidator, MaxValueValidator
 from django.utils import timezone
 from datetime import datetime
+import decimal
 
 cloudinary.config( 
     cloud_name = "den9yj6z5", 
@@ -71,6 +72,7 @@ class Discounts(models.Model):
             self.status = True
         elif today >= timezone.localtime(self.end_date):
             print('delete')
+            
             self.delete()
             
         else:
@@ -84,7 +86,7 @@ class Discounts(models.Model):
 class Products(models.Model):
     name = models.CharField(max_length=50)
     category = models.ForeignKey(Categories, on_delete=models.CASCADE)
-    price = models.IntegerField()
+    price = models.DecimalField(max_digits=15, decimal_places=2,)
     availability = models.BooleanField()
     character = models.TextField(default='')
     description = models.TextField(default='')
@@ -104,7 +106,8 @@ class Products(models.Model):
     @property
     def price_with_discount(self):
         if self.has_active_discount:
-            return self.price * (1 - self.discount.discount_percentage / 100)
+            return decimal.Decimal(float(self.price)  * (1 - self.discount.discount_percentage / 100))
+        
         return self.price
 
     def __str__(self):
@@ -162,7 +165,6 @@ class Orders(models.Model):
         ['framed','Замовлення оформлено'],
         ['transit', 'Доставляється' ],
         ['delivered', 'Доставлено'],
-        ['received' ,'Отримано'],
         ['canceled', 'Скасовано'],
     ]
     
