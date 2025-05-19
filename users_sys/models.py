@@ -44,6 +44,7 @@ class CustomerProfile(models.Model):
 
 class ShopProfile(models.Model):
     logo = CloudinaryField('image', validators=[file_validation])
+    name = models.CharField(max_length=50, null=True)
     description = models.TextField()
     groups = models.ManyToManyField(Group, related_name='shop_set', blank=True)
     user_permissions = models.ManyToManyField(Permission, related_name='shop_set', blank=True)

@@ -7,7 +7,8 @@ from django.core.exceptions import ValidationError
 from PIL import Image
 from users_sys.models import ShopProfile, CustomerProfile 
 from django.core.validators import MinValueValidator, MaxValueValidator
-
+from django.utils import timezone
+from datetime import datetime
 
 cloudinary.config( 
     cloud_name = "den9yj6z5", 
@@ -49,6 +50,36 @@ class Comment(models.Model):
 
     def __str__(self):
         return self.author.username
+    
+class Discounts(models.Model):
+
+    product = models.ForeignKey("Products", on_delete=models.CASCADE, related_name='discounts')
+    discount_percentage = models.FloatField()
+    start_date = models.DateTimeField()
+    end_date = models.DateTimeField()
+    status = models.BooleanField(default=False)
+
+    def is_active(self):
+        today = timezone.localtime(timezone.now())
+        print(f'''
+        {today}
+        Start date : {timezone.localtime(self.start_date)}
+        End date : {timezone.localtime(self.end_date)}
+        ''')
+        if timezone.localtime(self.start_date) <= today <= timezone.localtime(self.end_date):
+            print('True')
+            self.status = True
+        elif today >= timezone.localtime(self.end_date):
+            print('delete')
+            self.delete()
+            
+        else:
+            print('false')
+            self.status = False
+        return self.status
+
+    def __str__(self):
+        return self.product.name
 
 class Products(models.Model):
     name = models.CharField(max_length=50)
@@ -57,7 +88,24 @@ class Products(models.Model):
     availability = models.BooleanField()
     character = models.TextField(default='')
     description = models.TextField(default='')
-    shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE, null=True)
+    shop = models.ForeignKey(ShopProfile, on_delete=models.CASCADE, null=True, related_name='products')
+    discount = models.ForeignKey(Discounts, null=True, blank=True, on_delete=models.SET_NULL, related_name='products')
+
+    @property
+    def formatted_price(self):
+        return f'{self.price:,.2f}'.replace(',', ' ').replace('.00', '')
+
+
+    @property
+    def has_active_discount(self):
+        if self.discount != None:
+            return self.discount.is_active
+            
+    @property
+    def price_with_discount(self):
+        if self.has_active_discount:
+            return self.price * (1 - self.discount.discount_percentage / 100)
+        return self.price
 
     def __str__(self):
         return self.name
@@ -107,21 +155,7 @@ class ItemBasket(models.Model):
     basket = models.ForeignKey(Baskets, on_delete=models.CASCADE)
 
 
-class Discounts(models.Model):
 
-    STATUS_CHOICES = [
-        ['Активна', 'activate'],
-        ['Неактивна','deactivate']
-    ]
-
-    product = models.ForeignKey(Products, on_delete=models.CASCADE)
-    discount_percentage = models.FloatField()
-    start_date = models.DateTimeField()
-    end_date = models.DateTimeField()
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES)
-
-    def __str__(self):
-        return self.product.name
 
 class Orders(models.Model):
     STATUS_CHOICES = [

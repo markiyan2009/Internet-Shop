@@ -20,37 +20,45 @@
                 </button>
                 <div class="collapse navbar-collapse" id="navbarSupportedContent">
                     <ul class="navbar-nav me-auto mb-2 mb-lg-0">
-              
-                      <li>
-                        {% if request.user.is_authenticated %}
-                          {% if request.user.shop_profile  %}
+                    
+                    <li>
+                      {% if request.user.is_authenticated %}
+
+                        {% if request.user.shop_profile  %}
+                          <li class="nav-item">
                             <a href="{% url 'shop_detail' request.user.shop_profile.pk %}" class="nav-link">Profile</a>
-                          {% elif request.user.customer_profile  %}
-                            <li class="nav-item">
-                              <a href="{% url 'customer_detail' request.user.customer_profile.pk %}" class="nav-link">Profile</a>
-                            </li>
-                            <li class="nav-item">
-                              <a href="{% url 'basket_detail' request.user.basket.pk %}" class="nav-link">Basket</a>
-                            </li>
+                          </li>
+                          <li class="nav-item">
+                            <a href="{% url 'shop_products' %}" class="nav-link">Products</a>
+                          </li>
+                        {% elif request.user.customer_profile  %}
+                          <li class="nav-item">
+                            <a href="{% url 'customer_detail' request.user.customer_profile.pk %}" class="nav-link">Profile</a>
+                          </li>
+                          <li class="nav-item">
+                            <a href="{% url 'basket_detail' request.user.basket.pk %}" class="nav-link">Basket</a>
+                          </li>
+                          <li class="nav-item" >
+                            <a href="{% url 'orders_list' request.user.pk %}"  class="nav-link">Orders</a>
+                          </li>
 
-                            {% elif perms.shop.change_orders %}
-                              <li class="nav-item" >
-                                
-                                <a href="{% url 'orders_manager' request.user.pk%}"  class="nav-link">Orders</a>
-                              </li>
-                            
-                            {% else %}
-            
-                              <li class="nav-item" >
-                                <a href="{% url 'orders_list' request.user.pk %}"  class="nav-link">Orders</a>
-                              </li>
-                            {% endif %}
-
+                          {% elif perms.shop.change_orders %}
+                            <li class="nav-item" >
+                              
+                              <a href="{% url 'orders_manager' request.user.pk%}"  class="nav-link">Orders</a>
+                            </li>
+                          
                           {% else %}
+                            
+                            
+                          {% endif %}
 
-                          {% endif %} 
-                        
-                      </li>
+                        {% else %}
+
+                        {% endif %} 
+                      
+                    </li>
+                    
                       
                       <li class="nav-item">
                         <a class="nav-link disabled" aria-disabled="true">Disabled</a>
