@@ -180,3 +180,10 @@ class CreateReviewView(CreateView):
             review.save()
 
         return redirect('product', pk = self.kwargs['product_pk'])
+
+class CategoriesListViews(ListView):
+    model = Categories
+    template_name = 'customer/categories.html'
+    context_object_name = 'categories'
+
+    

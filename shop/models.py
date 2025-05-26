@@ -85,7 +85,7 @@ class Discounts(models.Model):
 
 class Products(models.Model):
     name = models.CharField(max_length=50)
-    category = models.ForeignKey(Categories, on_delete=models.CASCADE)
+    category = models.ForeignKey(Categories, on_delete=models.CASCADE, related_name='products')
     price = models.DecimalField(max_digits=15, decimal_places=2,)
     availability = models.BooleanField()
     character = models.TextField(default='')
@@ -183,5 +183,10 @@ class OrderItems(models.Model):
 
     def __str__(self):
         return self.user.username
+
+
+
+
+
 
 

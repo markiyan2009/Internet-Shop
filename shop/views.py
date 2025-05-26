@@ -3,7 +3,7 @@ from django.forms.models import BaseModelForm
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from shop.models import * 
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, View
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, View, TemplateView
 from django import http, template
 from shop.mixins import *
 from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -28,16 +28,39 @@ def zip_lists(a, b):
 def has_group(user, group_name):
     return user.groups.filter(name=group_name).exists()
 
-class HomeView(ListView):
-    model = Products
-    template_name = 'shop/home.html'
-    context_object_name = 'products'
+# class HomeView(ListView):
+#     model = Products
+#     template_name = 'shop/home.html'
+#     context_object_name = 'products'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
 
+#         products = Products.objects.all()
+
+#         context['loops'] = len(products)
+#         products_images = []
+#         for product in products:
+            
+#             imgs = product.product_images.all()
+            
+#             for img in imgs:
+                
+#                 if img.is_primary:
+#                     products_images.append(img)
+                    
+#             print(products_images)
+
+#         # context['categories'] = Categories.objects.all()
+#         context['combined'] = zip_lists(products, products_images)
+        
+#         return context
+class HomeView(View):
+    def get(self, request):
+        context = {}
+        categories = Categories.objects.all()
         products = Products.objects.all()
-
+    
         context['loops'] = len(products)
         products_images = []
         for product in products:
@@ -51,12 +74,51 @@ class HomeView(ListView):
                     
             print(products_images)
 
-            
+        context['categories'] = categories
         context['combined'] = zip_lists(products, products_images)
-        
-        return context
-    
 
+        
+
+
+        return render(request, 'shop/home.html', context=context)
+    
+class HomeCategoriesView(View):
+    def get(self, request):
+        categories = Categories.objects.all()
+        products = Products.objects.all()
+        for category in categories:
+            if request.GET.get(f'{category.pk}-category'):
+                products = Products.objects.filter(category = category).all()
+                
+        # products_images = []
+        # for product in products:
+            
+        #     imgs = product.product_images.all()
+            
+        #     for img in imgs:
+                
+        #         if img.is_primary:
+        #             products_images.append(img)
+
+        data = [
+            {
+                'name' : item.name,
+                'pk' : item.pk,
+                'price' : item.price,
+                'availability' : item.availability,
+                'character': item.character,
+                'description' :item.description,
+                
+                
+            } for item in products
+            
+        ]
+        data.append({'categories_len' : len(categories)})
+        print(data)
+        return JsonResponse({"results": data})
+        
+    
+    
     
 class UpdateOrderStatusView(PermissionRequiredMixin, UpdateView):
     permission_required = 'shop.change_orders'
