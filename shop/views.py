@@ -84,39 +84,29 @@ class HomeView(View):
     
 class HomeCategoriesView(View):
     def get(self, request):
-        categories = Categories.objects.all()
-        products = Products.objects.all()
-        for category in categories:
-            if request.GET.get(f'{category.pk}-category'):
-                products = Products.objects.filter(category = category).all()
-                
-        # products_images = []
-        # for product in products:
-            
-        #     imgs = product.product_images.all()
-            
-        #     for img in imgs:
-                
-        #         if img.is_primary:
-        #             products_images.append(img)
+        category_id = request.GET.get('category')
+        if category_id:
+            products = Products.objects.filter(category_id=category_id)
+        else:
+            products = Products.objects.all()
 
         data = [
             {
-                'name' : item.name,
-                'pk' : item.pk,
-                'price' : item.price,
-                'availability' : item.availability,
+                'name': item.name,
+                'pk': item.pk,
+                'price': item.price,
+                'availability': item.availability,
                 'character': item.character,
-                'description' :item.description,
-                
-                
-            } for item in products
-            
+                'description': item.description,
+                # Додай зображення
+                'image_url': item.product_images.filter(is_primary=True).first().image.url if item.product_images.filter(is_primary=True).exists() else ''
+            }
+            for item in products
         ]
-        data.append({'categories_len' : len(categories)})
-        print(data)
-        return JsonResponse({"results": data})
-        
+
+        return JsonResponse({
+            "results": data
+        })
     
     
     

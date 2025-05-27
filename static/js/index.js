@@ -1,43 +1,39 @@
-const url = 'http://127.0.0.1:8000/shop/home/categories/'
-async function getCategoriesLen(){
+const url = 'http://127.0.0.1:8000/shop/home/categories/';
 
-    const response = await fetch(url);
-    var data1 = await response.json();
-    return data1.results[data1.results.length - 1].categories_len
-};
+document.addEventListener('DOMContentLoaded', () => {
+    const buttons = document.querySelectorAll('[id$="-category"]'); // Всі кнопки категорій
 
+    buttons.forEach(button => {
+        button.addEventListener('click', () => {
+            const categoryId = button.id.split('-')[0]; // витягуємо ID
+            
+            fetch(`${url}?category=${categoryId}`)
+                .then(response => response.json())
+                .then(data => {
+                    const container = document.getElementById('products-container');
+                    container.innerHTML = ''; // очищаємо старі товари
 
-
-document.addEventListener('DOMContentLoaded', async () => {
-    const categories_len = await getCategoriesLen();
-
-    const categories_buttons = [];
-    for (let i = 1; i <= categories_len; i++) {
-        const button = document.getElementById(`${i}-category`);
-        if (button) {
-            categories_buttons.push(button);
-        }
-    }
-
-    console.log(categories_buttons);
-
-    categories_buttons.forEach(button =>{
-        button.addEventListener('click', function() {
-
-            fetch(url)
-            .then(response => response.json())
-            .then(data => {
-                data.results.forEach(item =>{
-
-                })
-            })
-
-        })
-    })
-
+                    data.results.forEach(product => {
+                        const productCard = `
+                            <div class="col">
+                                <div class="card" style="width: 18rem;">
+                                    <img src="${product.image_url}" class="card-img-top">
+                                    <div class="card-body">
+                                        <p class="card-text">${product.name}</p>
+                                        <ul class="list-group list-group-flush">
+                                            <li class="list-group-item">${product.character || ''}</li>
+                                        </ul>
+                                        <a href="/shop/product/${product.pk}/" class="btn btn-primary">Go</a>
+                                    </div>
+                                </div>
+                            </div>
+                        `;
+                        container.innerHTML += productCard;
+                    });
+                });
+        });
+    });
 });
-
-
 
 
 
