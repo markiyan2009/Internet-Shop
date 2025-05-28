@@ -165,6 +165,7 @@ class Orders(models.Model):
         ['framed','Замовлення оформлено'],
         ['transit', 'Доставляється' ],
         ['delivered', 'Доставлено'],
+        ['received','Отримано'],
         ['canceled', 'Скасовано'],
     ]
     

@@ -9,5 +9,5 @@ urlpatterns =[
     path('orders/<int:user_pk>/', views.OrdersListView.as_view(), name = 'orders_list'),
     path('order/items/<int:order_pk>/', views.OrderItemsListView.as_view(), name = 'order_items_list'),
     path('review/add/<int:product_pk>/', views.CreateReviewView.as_view(), name = 'add_review'),
-    
+    path('product/review_add/<int:pk>/', views.PermCreateReviewView.as_view(), name = 'add_review_perm'),
 ]

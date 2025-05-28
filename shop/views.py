@@ -64,7 +64,7 @@ class HomeView(View):
         context['loops'] = len(products)
         products_images = []
         for product in products:
-            
+            product.price =  product.formatted_price
             imgs = product.product_images.all()
             
             for img in imgs:
@@ -85,28 +85,31 @@ class HomeView(View):
 class HomeCategoriesView(View):
     def get(self, request):
         category_id = request.GET.get('category')
+        search_query = request.GET.get('search')
+
+        products = Products.objects.all()
+
         if category_id:
-            products = Products.objects.filter(category_id=category_id)
-        else:
-            products = Products.objects.all()
+            products = products.filter(category_id=category_id)
+
+        if search_query:
+            products = products.filter(name__icontains=search_query)
 
         data = [
             {
                 'name': item.name,
                 'pk': item.pk,
-                'price': item.price,
+                'price': item.formatted_price,
                 'availability': item.availability,
                 'character': item.character,
                 'description': item.description,
-                # Додай зображення
-                'image_url': item.product_images.filter(is_primary=True).first().image.url if item.product_images.filter(is_primary=True).exists() else ''
+                'image_url': item.product_images.filter(is_primary=True).first().image.url
+                    if item.product_images.filter(is_primary=True).exists() else ''
             }
             for item in products
         ]
 
-        return JsonResponse({
-            "results": data
-        })
+        return JsonResponse({"results": data})
     
     
     

@@ -12,29 +12,75 @@ document.addEventListener('DOMContentLoaded', () => {
                 .then(data => {
                     const container = document.getElementById('products-container');
                     container.innerHTML = ''; // очищаємо старі товари
-
+                    var productCard = `<div class='row'>`;
                     data.results.forEach(product => {
-                        const productCard = `
-                            <div class="col">
-                                <div class="card" style="width: 18rem;">
-                                    <img src="${product.image_url}" class="card-img-top">
-                                    <div class="card-body">
-                                        <p class="card-text">${product.name}</p>
-                                        <ul class="list-group list-group-flush">
-                                            <li class="list-group-item">${product.character || ''}</li>
-                                        </ul>
-                                        <a href="/shop/product/${product.pk}/" class="btn btn-primary">Go</a>
+                        
+                        productCard +=  `
+                            
+                                <div class="col">
+                                    <div class="card" style="width: 18rem;">
+                                        <img src="${product.image_url}" class="card-img-top">
+                                        <div class="card-body">
+                                            <p class="card-text">${product.name}</p>
+                                            <ul class="list-group list-group-flush">
+                                                <li class="list-group-item"><b>${product.price || ''}₴</b></li>
+                                            </ul>
+                                            <a href="/shop/product/${product.pk}/" class="btn btn-primary">Go</a>
+                                        </div>
                                     </div>
                                 </div>
-                            </div>
+                            
+                            
                         `;
-                        container.innerHTML += productCard;
+                        
+                        
                     });
+                    productCard +=  `</div>`
+                    console.log(productCard)
+                    container.innerHTML += productCard;
+
                 });
         });
     });
 });
 
+const searchForm = document.getElementById('search-form');
+const searchInput = document.getElementById('search-input');
+
+searchForm.addEventListener('submit', function (event) {
+    event.preventDefault(); // не оновлюємо сторінку
+
+    const query = searchInput.value.trim();
+
+    fetch(`${url}?search=${query}`)
+        .then(response => response.json())
+        .then(data => {
+            const container = document.getElementById('products-container');
+            container.innerHTML = ''; // очищаємо товари
+            var productCard = `<div class='row'>`;
+            data.results.forEach(product => {
+                productCard += `
+                    <div class="col">
+                        <div class="card" style="width: 18rem;">
+                            <img src="${product.image_url}" class="card-img-top">
+                            <div class="card-body">
+                                <p class="card-text">${product.name}</p>
+                                <ul class="list-group list-group-flush">
+                                    <li class="list-group-item"><b>${product.price}₴</b></li>
+                                </ul>
+                                <a href="/shop/product/${product.pk}/" class="btn btn-primary">Go</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                
+            });
+            productCard +=  `</div>`
+            console.log(productCard)
+            container.innerHTML += productCard;
+
+        });
+});
 
 
 

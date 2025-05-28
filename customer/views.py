@@ -24,6 +24,7 @@ def has_group(user, group_name):
     return user.groups.filter(name=group_name).exists()
 
 
+
 class ProductDetailView(DetailView):
     model = Products
     template_name = 'customer/product-detail.html'
@@ -186,4 +187,11 @@ class CategoriesListViews(ListView):
     template_name = 'customer/categories.html'
     context_object_name = 'categories'
 
-    
+class PermCreateReviewView(View):
+    def get(self, request, pk):
+        # has_perm = request.user.has_perm('shop.add_review_who_but_it') 
+
+        product = Products.objects.filter(pk = pk).first()
+        has_perm = OrderItems.objects.filter(order__user= request.user,   order__status='received', product=product).exists()
+        print(has_perm)
+        return JsonResponse({'has_perm': has_perm})

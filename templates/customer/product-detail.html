@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+{% load static %}
 <div class="container">
 
     <div class="row text-center margin-20">
@@ -130,7 +130,9 @@
             {% endfor %}
             
             <div class="row">
-                <a href="{% url 'add_review' product.pk %}">Add review</a>
+                <button id="add-review" data-review-url="{% url 'add_review' product.pk %}" data-check-perm-url="{% url 'add_review_perm' product.pk %}">
+                    Add review
+                </button>
             </div>
         </div>
 
@@ -140,8 +142,6 @@
 
 </div>
 
-<script>
-
-</script>
+<script src="{% static 'js/review.js' %}"></script>
 
 {% endblock %}
