@@ -171,43 +171,10 @@ class ShopProductView(PermissionRequiredMixin, UpdateView):
         context = super().get_context_data(**kwargs)
         product = Products.objects.filter(pk = self.kwargs['pk']).first()
         product_images = product.product_images.all()
-       
-        
-        # img_forms = []
-        # for img in product_images:
-        #     form = forms.UpdateProductImagesForm(initial={'image':img})
-        #     img_forms.append(form)
-
-        # context['img_forms'] = img_forms
+    
         context['imgs'] = product_images
         return context
 
-#     def post(self, request, *args, **kwargs):
-#         self.object = self.get_object()
-#         product = self.get_object()
-#         product_form = self.get_form()
-#         img_forms = [forms.UpdateProductImagesForm(request.POST, prefix=str(i)) for i in range(3)]
-#         product_images = product.product_images.all()
-#         all_valid = product_form.is_valid() and all(f.is_valid() for f in img_forms)
-#         image_fields = []
-#         for i in range(len(product_images)):
-#             image_fields.append(F'image_{i}')
-        
-# # доробити
-#         if all_valid:
-#             product_form.save()
-#             for i in range(len(product_images)):
-#                 old_img = product_images[i]
-#                 img = img_forms[i].cleaned_data["image"]
-#                 field_name = image_fields[i]
-
-#                 if old_img:
-#                     destroy(old_img.public_id)
-#                 uploaded = upload(img)
-#                 setattr(self.object, field_name, uploaded['public_id'])
-#                 img_forms[i].save()
-#             self.object.save()
-#         return redirect(self.get_success_url())
                 
 class CreateDiscountView(CreateView):
     model = Discounts
@@ -223,3 +190,32 @@ class CreateDiscountView(CreateView):
         
         product.save()
         return super().form_valid(form)
+
+# class UpdateProductImagesView(UpdateView):
+#     permission_required = 'shop.change_productimages'
+#     model = ProductImages
+#     form_class = None
+
+class CreateProductView(View):
+    def get(self, request):
+        pass
+
+def create_product(request):
+    if request.method == 'POST':
+        form = forms.CreateProductForm(request.POST)
+        formset = forms.ProductImageFormSet(request.POST, request.FILES, prefix='images')
+        if form.is_valid() and formset.is_valid():
+            shop_profiles = ShopProfile.objects.all()
+            auth = request.user
+            form.instance.shop = auth.shop_profile
+            
+            product = form.save()
+            formset.instance = product
+            formset.save()
+            return redirect('shop_products')  # або інша твоя сторінка
+    else:
+        form = forms.CreateProductForm()
+        formset = forms.ProductImageFormSet(prefix='images')
+
+
+    return render(request, 'shop/create_product.html', {'form': form, 'formset': formset})

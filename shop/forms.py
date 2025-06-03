@@ -21,10 +21,21 @@ class UpdateProductForm(forms.ModelForm):
         model = Products
         fields = ['name', 'price', 'availability', 'character', 'description']
 
-class UpdateProductImagesForm(forms.ModelForm):
+class CreateProductForm(forms.ModelForm):
+    class Meta:
+        model = Products
+        fields = ['name', 'category', 'price', 'availability', 'character', 'description']
+
+class CreateProductImageForm(forms.ModelForm):
     class Meta:
         model = ProductImages
-        fields = ['image']
+        fields = ['image', 'is_primary']
+    
+ProductImageFormSet = forms.inlineformset_factory(
+    Products, ProductImages, form=CreateProductImageForm,
+    extra=1, can_delete=True
+)
+
 
 class CreateDiscountForm(forms.ModelForm):
     class Meta:
