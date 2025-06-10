@@ -196,10 +196,8 @@ class CreateDiscountView(CreateView):
 #     model = ProductImages
 #     form_class = None
 
-class CreateProductView(View):
-    def get(self, request):
-        pass
 
+@permission_required('shop.add_products')
 def create_product(request):
     if request.method == 'POST':
         form = forms.CreateProductForm(request.POST)
@@ -219,3 +217,16 @@ def create_product(request):
 
 
     return render(request, 'shop/create_product.html', {'form': form, 'formset': formset})
+
+class DeleteProductView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'shop.delete_products'
+    model = Products
+    template_name = 'shop/delete_product.html'
+    success_url = reverse_lazy('shop_products')
+
+    def get_context_data(self, **kwargs) :
+        context = super().get_context_data(**kwargs)
+        context['product'] = Products.objects.filter(pk = self.kwargs['pk']).first()
+
+        return context
+    

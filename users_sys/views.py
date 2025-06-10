@@ -11,6 +11,7 @@ from users_sys import models
 from shop import models as shop_models
 from django.contrib.auth.models import Group
 from django.contrib.auth.mixins import PermissionRequiredMixin
+import cloudinary
 
 customer_group = Group.objects.get(name='customer') 
 shop_group = Group.objects.get(name='magazine') 
@@ -98,3 +99,38 @@ class DetailCustomerProfileView(PermissionRequiredMixin, DetailView):
     template_name = 'users_sys/detail_customer_profile.html'
     context_object_name = 'profile'
 
+class UpdateCustomerProfile(PermissionRequiredMixin, UpdateView):
+    permission_required = 'users_sys.change_customerprofile'
+    model = models.CustomerProfile
+    template_name = 'users_sys/update_profile.html'
+    form_class = CustomerProfileForm
+    
+
+    def form_valid(self, form):
+        profile = models.CustomerProfile.objects.filter(pk = self.kwargs['pk']).first()
+       
+        if form.instance.photo and profile.photo:
+            cloudinary.uploader.destroy(profile.photo.public_id)
+        return super().form_valid(form)
+    
+    def get_success_url(self) -> str:
+        return reverse_lazy('customer_detail', kwargs = {'pk': self.kwargs['pk']})
+    
+class UpdateShopProfile(PermissionRequiredMixin, UpdateView):
+    permission_required = 'users_sys.change_shopprofile'
+    model = models.ShopProfile
+    template_name = 'users_sys/update_profile.html'
+    form_class = ShopProfileForm
+
+    def form_valid(self, form):
+        profile = models.ShopProfile.objects.filter(pk = self.kwargs['pk']).first()
+       
+        if form.instance.logo and profile.logo:
+            cloudinary.uploader.destroy(profile.logo.public_id)
+        return super().form_valid(form)
+    
+    def get_success_url(self) -> str:
+        return reverse_lazy('customer_detail', kwargs = {'pk': self.kwargs['pk']})
+    
+    def get_success_url(self) -> str:
+        return reverse_lazy('shop_detail', kwargs = {'pk': self.kwargs['pk']})

@@ -11,13 +11,15 @@ from . import forms
 from django import template
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
+from django.core.exceptions import PermissionDenied
+from collections import Counter
 # Create your views here.
 
 register = template.Library()
 
 @register.filter
-def zip_lists(a, b):
-    return zip(a, b)
+def zip_lists(*args):
+    return zip(*args)
 
 @register.filter(name='has_group')
 def has_group(user, group_name):
@@ -37,7 +39,7 @@ class ProductDetailView(DetailView):
         context['imgs'] = imgs
         
         context['product'].price = f'{context["product"].price:,}'.replace(',', ' ') 
-
+        
         context['reviews'] = context['product'].reviews.all()
 
         
@@ -53,12 +55,15 @@ class BusketDetailView(PermissionRequiredMixin, DetailView):
     def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
 
         context = super().get_context_data(**kwargs)
-
-        products = context['basket'].products.all()
+        all_products = Products.objects.all()
+        basket_items = context['basket'].items.all()
+        product_ids = basket_items.values_list('product_id', flat=True)
+        products = Products.objects.filter(id__in=product_ids)
         print(products)
+        
         products_images = []
         for product in products:
-            
+            product.price =  product.formatted_price
             imgs = product.product_images.all()
             
             for img in imgs:
@@ -67,8 +72,8 @@ class BusketDetailView(PermissionRequiredMixin, DetailView):
                     products_images.append(img)
                     
             
-        context['combined'] = zip_lists(products, products_images)
-
+        context['combined'] = zip_lists(products, products_images, basket_items)
+    
         return context
 
 class AddProductToBusketView(PermissionRequiredMixin, View):
@@ -81,8 +86,28 @@ class AddProductToBusketView(PermissionRequiredMixin, View):
         
         product = Products.objects.filter(pk = self.kwargs['pk']).first()
         
-        basket.products.add(product)
+        item = ItemBasket.objects.create(basket= basket, product = product)
+        item.save()
         
+
+        
+        return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs={'pk' : basket.pk}))
+
+class ActionProductQuantityView(View):
+    def post(self, request, *args, **kwargs):
+        if request.method == 'POST':
+            print('get')
+            basket = Baskets.objects.filter(pk = self.kwargs['pk']).first()
+            for item in basket.items.all():
+                btn_action = request.POST.get('action')
+                if btn_action == f'add-btn-{item.pk}':
+                
+                    item.quantity += 1
+                    item.save()
+                elif btn_action == f'minus-btn-{item.pk}':
+                    if item.quantity >1:
+                        item.quantity -= 1
+                        item.save()
         return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs={'pk' : basket.pk}))
 
 class CreateOrderView(PermissionRequiredMixin, View):
@@ -90,32 +115,43 @@ class CreateOrderView(PermissionRequiredMixin, View):
     
     def get(self, request, *args, **kwargs):
         basket = request.user.basket
-        products = basket.products.all()
-        quantity = 1
-        total_price = 0
+        basket_items = basket.items.all()
+        product_ids = basket_items.values_list('product_id', flat=True)
+        products = Products.objects.filter(id__in=product_ids)
         
-        order = Orders(user = request.user)
-        order.save()
-        for product in products:
-            order_item = OrderItems(order = order, product = product, quantity = quantity)
-            order_item.save()
-            if product.discount:
+        product_counts = Counter(products)  # <--- Оце головне
 
-                total_price += product.price_with_discount * quantity
+        total_price = 0
+        order = Orders(user=request.user)
+        order.save()
+
+        for product, item in zip(products, basket_items):
+            order_item = OrderItems(order=order, product=product, quantity= item.quantity)
+            order_item.save()
+
+            if product.discount:
+                total_price += product.price_with_discount * item.quantity
+            else:
+                total_price += product.price * item.quantity
+
             order.order_items.add(order_item)
-            
-        
+
         order.total_price = total_price
         order.save()
-        basket.products.clear()
-        
-        return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs = {'pk':basket.pk}))
+        basket.items.all().delete()  # очищення кошика
+
+        return redirect('basket_detail', pk=basket.pk)
         
 class OrdersListView(PermissionRequiredMixin, ListView):
     permission_required = 'shop.view_orders'
     template_name = 'customer/orders.html'
     context_object_name = 'orders'
     model = Orders
+
+    def get_context_data(self, **kwargs: Any):
+        context = super().get_context_data(**kwargs)
+        context['orders'] = Orders.objects.filter(user = self.request.user).all()
+        return context
         
 class OrderItemsListView(PermissionRequiredMixin, ListView):
     permission_required = 'shop.view_orderitems'
@@ -129,6 +165,14 @@ class OrderItemsListView(PermissionRequiredMixin, ListView):
         
 
         order = Orders.objects.filter(pk = self.kwargs['order_pk']).first()
+
+        order.total_price = f'{order.total_price:,.2f}'.replace(',', ' ').replace('.00', '')
+
+        if order.status == 'received':
+            context['color'] = 'rgb(0, 121, 1)'
+        elif order.status == 'canceled':
+            context['color'] = 'red'
+
         context['order'] = order
 
         context['order_items'] = OrderItems.objects.filter(order = order).all()
@@ -140,7 +184,8 @@ class OrderItemsListView(PermissionRequiredMixin, ListView):
         
         products_images = []
         for product in products:
-            
+            # тут форматувати ціну !!!!!!!!!!!!
+            product.price =  product.formatted_price
             imgs = product.product_images.all()
             
             for img in imgs:
@@ -195,3 +240,41 @@ class PermCreateReviewView(View):
         has_perm = OrderItems.objects.filter(order__user= request.user,   order__status='received', product=product).exists()
         print(has_perm)
         return JsonResponse({'has_perm': has_perm})
+    
+class DeleteReviewView(DeleteView):
+    model = Reviews
+    template_name = 'customer/delete_review.html'
+    success_url = reverse_lazy('home')
+
+class DeleteItemBusketView(DeleteView):
+    model = ItemBasket
+    template_name = 'customer/delete_item_basket.html'
+
+    def dispatch(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+
+        item = ItemBasket.objects.filter(pk = self.kwargs['pk']).first()
+        if item.basket.user != request.user:
+            return PermissionDenied
+        return super().dispatch(request, *args, **kwargs)
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        item = ItemBasket.objects.filter(pk=self.kwargs['pk']).first()
+        context['name'] = item.product.name
+        context['basket_pk'] = item.basket.pk
+        return context
+    def get_success_url(self) -> str:
+        basket = ItemBasket.objects.filter(pk = self.kwargs['pk']).first().basket
+        return reverse_lazy('basket_detail', kwargs={'pk': basket.pk})
+    
+
+class CancelOrderView(View):
+    def get(self, request: HttpRequest, *args: Any, **kwargs: Any) -> HttpResponse:
+        order = Orders.objects.filter(pk = self.kwargs['pk']).first()
+        if order.user != request.user and order.status == 'framed':
+            return PermissionDenied
+        else:
+            order.status = 'canceled'
+            order.save()
+        return HttpResponseRedirect(reverse_lazy('orders_list', kwargs={'user_pk' : request.user.pk}))
+    

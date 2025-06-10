@@ -10,9 +10,7 @@
           <h5 class="card-title">{{order.status}}</h5>
           
           <a href="{% url 'order_items_list' order.pk %}" class="btn btn-primary">Переглянути замовлення</a>
-          {% if perms.shop.change_orders %}
-            <!-- <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Оновити статус</a> -->
-          {% endif %}
+          <a href="{% url 'cancel_order' order.pk %}"><button>Скасувати</button></a>
         </div>
       </div>
     {% endfor %}

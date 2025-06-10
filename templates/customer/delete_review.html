@@ -1,0 +1,25 @@
+{% extends 'base.html' %}
+{% block content %}
+
+<div class="container">
+    <div class="row">
+        <h1>Delete review</h1>
+    </div>
+    <div class="row">
+        <form method="post">
+            {% csrf_token %}
+            <div class="row">
+                <div class="col-2">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </div>
+                <div class="col-2">
+                    <button type="button" class="btn btn-primary" onclick="location.href='{% url 'home' %}'">Return</button>
+                </div>
+            
+            </div>
+            
+        </form>
+    </div>
+</div>
+
+{% endblock %}

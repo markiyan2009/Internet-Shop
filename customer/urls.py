@@ -10,4 +10,8 @@ urlpatterns =[
     path('order/items/<int:order_pk>/', views.OrderItemsListView.as_view(), name = 'order_items_list'),
     path('review/add/<int:product_pk>/', views.CreateReviewView.as_view(), name = 'add_review'),
     path('product/review_add/<int:pk>/', views.PermCreateReviewView.as_view(), name = 'add_review_perm'),
+    path('review/delete/<int:pk>/', views.DeleteReviewView.as_view(), name = 'delete_review'),
+    path('basket/item/quantity_action/<int:pk>', views.ActionProductQuantityView.as_view(), name = 'action_quantity'),
+    path('basket/item/delete/<int:pk>/', views.DeleteItemBusketView.as_view(), name='delete_item_basket'),
+    path('order/cancel/<int:pk>/', views.CancelOrderView.as_view(), name = 'cancel_order'),
 ]

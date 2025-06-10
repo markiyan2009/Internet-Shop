@@ -10,4 +10,6 @@ urlpatterns = [
     path('profile/customer_create/', views.CreateCustomerProfileView.as_view(), name='customer_profile_create'),
     path('profile/customer/<int:pk>/', views.DetailCustomerProfileView.as_view(), name='customer_detail'),
     path('profile/shop/<int:pk>/', views.DetailShopProfileView.as_view(), name='shop_detail'),
+    path('profile/customer/update/<int:pk>/', views.UpdateCustomerProfile.as_view(), name = 'update_customer_profile'),
+    path('profile/shop/update/<int:pk>/', views.UpdateShopProfile.as_view(), name = 'update_shop_profile'),
 ]

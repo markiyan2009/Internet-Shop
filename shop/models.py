@@ -143,8 +143,7 @@ class Reviews(models.Model):
 class Baskets(models.Model):
 
     user = models.OneToOneField(User, on_delete=models.CASCADE, related_name='basket')
-    products = models.ManyToManyField(Products, related_name='basket')
-
+    
     class Meta:
         permissions = [
             ('add_product_to_busket', 'Add product to busket'),
@@ -154,9 +153,12 @@ class Baskets(models.Model):
         return self.user.username
 
 class ItemBasket(models.Model):
-    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='item_basket')
-    basket = models.ForeignKey(Baskets, on_delete=models.CASCADE)
+    product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='items')
+    basket = models.ForeignKey(Baskets, on_delete=models.CASCADE, related_name='items')
+    quantity = models.IntegerField(default=1)
 
+    def __str__(self):
+        return self.quantity
 
 
 
@@ -174,16 +176,13 @@ class Orders(models.Model):
     status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='framed')
     total_price = models.IntegerField(blank=True, null=True)
 
-    def __str__(self):
-        return self.user.username
 class OrderItems(models.Model):
     
     order = models.ForeignKey(Orders, on_delete=models.CASCADE, related_name='order_items')
     product = models.ForeignKey(Products, on_delete=models.CASCADE, related_name='order_items')
     quantity = models.IntegerField(default=1)
 
-    def __str__(self):
-        return self.user.username
+
 
 
 

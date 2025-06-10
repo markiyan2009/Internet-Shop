@@ -84,11 +84,7 @@
                                             
                                                     <h3>{{product.price}}<b>₴</b></h3>
                                                     <br>
-                                                    <div class="btn-group" role="group" aria-label="Basic example">
-                                                        <button type="button" class="btn border border-secondary number-border">-</button>
-                                                        <button type="button" id='number-product' class="btn btn-primary">1</button>
-                                                        <button type="button" class="btn border border-secondary number-border">+</button>
-                                                    </div>
+                                                    <p>You sure you want to add this product to basket?</p>
                                                     
                                                 </div>
                                             </div>
@@ -122,7 +118,15 @@
                         Raiting: {{review.rating}}
                     </div>
                     <div class="row">
-                        <p>{{review.comment.text}}</p>
+                        <div class="col-11">
+                            <p>{{review.comment.text}}</p>
+                        </div>
+                        <div class="col">
+                            {% if review.user == request.user %}
+                                <a href="{% url 'delete_review' review.pk %}"><button>Delete</button></a>
+                            {% endif %}
+                        </div>
+                       
                     </div>
                 </div>
                 
