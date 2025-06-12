@@ -5,57 +5,71 @@
         {% for product, product_image in combined %}
 
             <div class="row">
-            <div class="card mb-3" style="max-width: 540px;">
-                <div class="row g-0">
-                    <div class="col-md-4">
-                    <img src="{{product_image.image.url}}" class="img-fluid rounded-start" alt="...">
-                    </div>
-                    <div class="col-md-8">
-                    <div class="card-body">
-                        <div class="container">
+                
+                    <div class="card mb-5" style="max-width: 1000px;">
+                        <div class="row g-0">
+                            <div class="col-md-4">
+                                <img src="{{product_image.image.url}}" class="img-fluid rounded-start" alt="...">
+                            </div>
+                            <div class="col-md-8">
+                            <div class="card-body">
+                                <div class="container">
+                                    <div class="row">
+                                        <div class="row">
 
-                            <div class="row">
+                                            <div class="col-8">
+                                                <h5 class="card-title">{{product.name}}</h5>
 
-                                <div class="col-8">
-                                    <h5 class="card-title">{{product.name}}</h5>
-                                    <div class="btn-group" role="group" aria-label="Basic example">
-                                        <button type="button" class="btn border border-secondary number-border">-</button>
-                                        <button type="button" id='number-product' class="btn btn-primary">1</button>
-                                        <button type="button" class="btn border border-secondary number-border">+</button>
-                                    </div>
+                                                
 
-                                    <a href="{% url 'update_product' product.pk %}"><button>Оновити інформацію</button></a>
+                                            </div>
 
-                                </div>
-
-                                <div class="col">
-                                    {% if product.has_active_discount %}
-                                        <p>
                                             
-                                            <del>{{ product.formatted_price }} грн</del>
-                                            <strong>{{ product.price_with_discount }} грн</strong>
-                                            <span class="badge">-{{ product.discount.percentage }}%</span>
-                                        </p>
+                                                {% if product.has_active_discount %}
+                                                    <p>
+                                                        
+                                                        <del>{{ product.formatted_price }} ₴</del>
+                                                        <strong>{{ product.price_with_discount }} ₴</strong>
+                                                        <span class="badge">-{{ product.discount.percentage }}%</span>
+                                                        
+                                                    </p>
+                                                    
+                                                {% else %}
+                                                    
+                                                    <p>{{ product.formatted_price }} ₴</p>
+                                                {% endif %}
+                                                <!-- <h5>{{product.price}}</h5> -->
+                                                
+                                        </div>
+                                        <div class="row">
+                                            <div class="col-5">
+                                                <a href="{% url 'create_discount' product.pk %}"><button class="btn btn-warning">Create a discount</button></a>
+                                            </div>
+                                            <div class="col-5">
+                                                <a href="{% url 'update_product' product.pk %}"><button class="btn btn-primary">Update information</button></a>
+                                            </div>
+                                            <div class="col">
+                                                <a href="{% url 'delete_product' product.pk %}"><button class="btn btn-danger">Delete</button></a>
+                                            </div>
+                                            
+                                            
+                                        </div>
                                         
-                                    {% else %}
-                                        
-                                        <p>{{ product.formatted_price }} грн</p>
-                                    {% endif %}
-                                    <!-- <h5>{{product.price}}</h5> -->
-                                    <a href="{% url 'create_discount' product.pk %}"><button>Створити знижку</button></a>
-                                    <a href="{% url 'delete_product' product.pk %}"><button>Delete</button></a>
-                                </div>
-
+                                    
+                                    </div>
                             </div>
                         </div>
                     </div>
                     </div>
+                
+
                 </div>
                 </div>
             </div>
         {% endfor %}
         
         <a href="{% url 'create_product' %}"><button class="btn btn-primary">Create product</button></a>
-
+    
+        </div>
     </div>
 {% endblock %}

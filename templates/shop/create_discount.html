@@ -1,11 +1,23 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
-    <form method="post">
-        {% csrf_token %}
-        {{form.as_p}}
-        <button type="submit">Створити</button>
-    </form>
+    <div class="row">
+        <div class="col-5">
+            
+                <form method="post">
+                    {% csrf_token %}
+                    {{form.as_p}}
+                    <div class="row">
+                        <div class="col-4">
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </div>
+                       
+                    </div>
+                    
+                </form>
+            
+        </div>
+    </div>
+    
 
 {% endblock %}

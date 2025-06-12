@@ -2,21 +2,28 @@
 
 {% block content %}
 {% load static %}
-<form method="post" enctype="multipart/form-data" id="product-form">
-    {% csrf_token %}
-    {{ form.as_p }}
-    <div id="image-formset">
-        {{ formset.management_form }}
-        {% for form in formset %}
-            <div class="image-form">
-                {{ form.as_p }}
+<div class="row">
+    <form method="post" enctype="multipart/form-data" id="product-form">
+        <div class="col-5">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div id="image-formset">
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="image-form">
+                        {{ form.as_p }}
+                    </div>
+                {% endfor %}
             </div>
-        {% endfor %}
-    </div>
+            <div style="margin-bottom: 20px;">
+                <button type="button" id="add-image-btn" class="btn btn-warning" >Додати ще фото</button>
+                <button type="submit" class="btn btn-primary">Зберегти продукт</button>
+            </div>
+            
+        </div>
+    </form>
 
-    <button type="button" id="add-image-btn">Додати ще фото</button>
-    <button type="submit">Зберегти продукт</button>
-</form>3
+</div>
 
 <script >
     

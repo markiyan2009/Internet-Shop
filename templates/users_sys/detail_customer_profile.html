@@ -9,18 +9,20 @@
         </div>
         <div class="col-7">
             <div class="row">
-                <h2>{{profile.name}}</h2>
+                <h2>{{profile.user.username}}</h2>
+                <div class="row">
+                    Phone number:
+                    <p>{{profile.phone_number}}</p>
+                </div>
+                <div class="row">
+                    <a href="{% url 'update_customer_profile' profile.pk %}"><button class='btn btn-warning'>Update</button></a>
+                </div>
             </div>
-            <div class="row">
-                Phone number
-                <p>{{profile.phone_number}}</p>
-            </div>
+            
         </div>
 
     </div>
-    <div class="row">
-        <a href="{% url 'update_customer_profile' profile.pk %}"><button>Update</button></a>
-    </div>
+    
 </div>
 
 {% endblock %}

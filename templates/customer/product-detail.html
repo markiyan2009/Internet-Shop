@@ -106,8 +106,9 @@
     </div>
 
     <!-- rewievs -->
-   <h1>Reviews</h1>
-   <div class="row">
+   
+   <div class="row" style="margin-top: 20px ;">
+        <h1>Reviews</h1>
         <div class="container">
 
             {% for review in reviews %}
@@ -115,15 +116,20 @@
 
                 <div class="container">
                     <div class="row">
-                        Raiting: {{review.rating}}
+                        <h3>{{review.user.username}}</h3>
+                    </div>
+                    <div class="row">
+                        <div class="col">
+                            <h5><span>Raiting:</span> {{review.rating}}/5</h5>
+                        </div>
                     </div>
                     <div class="row">
                         <div class="col-11">
-                            <p>{{review.comment.text}}</p>
+                            <p style="font-size: 17px;">{{review.comment.text}}</p>
                         </div>
                         <div class="col">
                             {% if review.user == request.user %}
-                                <a href="{% url 'delete_review' review.pk %}"><button>Delete</button></a>
+                                <a href="{% url 'delete_review' review.pk %}"><button class="btn btn-danger">Delete</button></a>
                             {% endif %}
                         </div>
                        
@@ -134,9 +140,11 @@
             {% endfor %}
             
             <div class="row">
-                <button id="add-review" data-review-url="{% url 'add_review' product.pk %}" data-check-perm-url="{% url 'add_review_perm' product.pk %}">
-                    Add review
-                </button>
+                <div class="col-6" style="margin-top: 10px; margin-bottom: 20px;">
+                    <button class="btn btn-success" id="add-review" data-review-url="{% url 'add_review' product.pk %}" data-check-perm-url="{% url 'add_review_perm' product.pk %}">
+                        Add review
+                    </button>
+                </div>
             </div>
         </div>
 

@@ -3,14 +3,21 @@
 
 
 {% block content %}
-    {% for order in orders %}
-    <div class="card">
+    {% for order,color in combined %}
+    <div class="card" style="margin-bottom: 10px;">
         <h5 class="card-header">Номер замовлення</h5>
         <div class="card-body">
-          <h5 class="card-title">{{order.status}}</h5>
-          
-          <a href="{% url 'order_items_list' order.pk %}" class="btn btn-primary">Переглянути замовлення</a>
-          <a href="{% url 'cancel_order' order.pk %}"><button>Скасувати</button></a>
+          <h5 class="card-title" style="color:{{color}}">{{order.get_status_display}}</h5>
+          <div class="row">
+            <div class="col-6">
+              <a href="{% url 'order_items_list' order.pk %}" class="btn btn-primary">Переглянути замовлення</a>
+            </div>
+            <div class="col-2">
+              {% if order.status == 'framed' %}
+                <a href="{% url 'cancel_order' order.pk %}" ><button class="btn btn-danger">Скасувати</button></a>
+              {% endif %}
+            </div>
+          </div>
         </div>
       </div>
     {% endfor %}

@@ -133,6 +133,21 @@ class OrderListManagerView(PermissionRequiredMixin, ListView):
     model = Orders
     context_object_name = 'orders'  
 
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        
+        colors = []
+        for order in context['orders']:
+            if order.status == 'received':
+                colors.append('rgb(0, 121, 1)')
+            elif order.status == 'canceled':
+                colors.append('red')
+            else:
+                colors.append('black')
+        
+        context['combined'] = zip(context['orders'], colors)
+        return context
+
 class ProductShopListView(ListView):
     # permission_required = None
     model = Products

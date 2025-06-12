@@ -137,6 +137,7 @@ class CreateOrderView(PermissionRequiredMixin, View):
             order.order_items.add(order_item)
 
         order.total_price = total_price
+        order.user = request.user
         order.save()
         basket.items.all().delete()  # очищення кошика
 
@@ -150,7 +151,18 @@ class OrdersListView(PermissionRequiredMixin, ListView):
 
     def get_context_data(self, **kwargs: Any):
         context = super().get_context_data(**kwargs)
-        context['orders'] = Orders.objects.filter(user = self.request.user).all()
+        orders = Orders.objects.filter(user = self.request.user).all()
+        context['orders'] = orders
+        colors = []
+        for order in context['orders']:
+            if order.status == 'received':
+                colors.append('rgb(0, 121, 1)')
+            elif order.status == 'canceled':
+                colors.append('red')
+            else:
+                colors.append('black')
+        
+        context['combined'] = zip(orders, colors)
         return context
         
 class OrderItemsListView(PermissionRequiredMixin, ListView):
