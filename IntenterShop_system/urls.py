@@ -19,11 +19,14 @@ from django.urls import path, include
 from shop.views import HomeView
 from django.conf.urls.static import static
 from . import settings
+import debug_toolbar
+from django.views.decorators.cache import cache_page
 
 urlpatterns = [
-    path('' , HomeView.as_view(), name='home'),
+    path('' , (cache_page(60*2))(HomeView.as_view()), name='home'),
     path('admin/', admin.site.urls),
     path('shop/', include('shop.urls')),
     path('auth/', include('users_sys.urls')),
     path('customer/', include('customer.urls')),
-] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
+     path('__debug__/', include(debug_toolbar.urls)),
+] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 

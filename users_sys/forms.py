@@ -27,12 +27,17 @@ class RegisterForm(UserCreationForm):
 class ShopProfileForm(forms.ModelForm):
     class Meta:
         model = models.ShopProfile
-        fields = ['logo','description']  
+        fields = ['name', 'logo','description']  
         widgets = {
             'logo' : forms.FileInput(attrs={
                 'class' : 'form-control'
             }),
             'description' : forms.Textarea(
+                attrs={
+                    'class' : 'form-control'
+                }
+            ),
+            'name' : forms.TextInput(
                 attrs={
                     'class' : 'form-control'
                 }
