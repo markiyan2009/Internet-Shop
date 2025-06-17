@@ -5,7 +5,7 @@
         <div class="row">
             <h2>Деталі замовлення</h2>
             <h4>Номер замовлення</h4>
-            <h5>{{order.status}}</h5>
+            <h5 style="color : {{color}}">{{order.get_status_display}}</h5>
         </div>
         
         {% for product, product_image in combined %}
@@ -19,6 +19,7 @@
                     <div class="col-md-8">
                     <div class="card-body">
                         <h5 class="card-title">{{product.name}}</h5>
+                        <p><b>{{product.price}} ₴</b></p>
                     </div>
                     </div>
                 </div>
@@ -26,7 +27,12 @@
             </div>
         {% endfor %}
         <div class="row">
-            <h3>Ціна:{{order.total_price}}</h3>
+            <h3>Ціна: <b>{{order.total_price}} ₴</b></h3>
+        </div>
+        <div class="row">
+            <div class="col-4">
+                <button>Pay</button>
+            </div>
         </div>
     </div>
     

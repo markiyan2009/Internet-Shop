@@ -1,28 +1,37 @@
 {% extends 'base.html' %}
 {% block content %}
-
-    <div class="context">
-        <div class="row">
-            
-            {% for product, product_image in combined %}
-                <div class="col">
-                    <div class="card" style="width: 18rem;">
-                        <img src="{{product_image.image.url}}" class="card-img-top" >
-                        <div class="card-body">
-                            
-                            <p class="card-text">{{product.name}}</p>
-                            <ul class="list-group list-group-flush">
-                                <li class="list-group-item">An item</li>
-                                
-                            </ul>
-                            <a href="{% url 'product' product.pk %}" class="btn btn-primary">Go </a>
+    {% load static %}
+   
+    <div class="row">
+    
+        <div id="products-container">
+            <div class="row">
+                {% for product, product_image in combined %}
+                
+                        <div class="col">
+                            <div class="card" style="width: 18rem;">
+                                <img src="{{ product_image.image.url }}" class="card-img-top">
+                                <div class="card-body">
+                                    <p class="card-text">{{ product.name }}</p>
+                                    <ul class="list-group list-group-flush">
+                                        <li class="list-group-item"><b>{{product.price}}₴</b></li>
+                                    </ul>
+                                    <a href="{% url 'product' product.pk %}" class="btn btn-primary">Go</a>
+                                </div>
+                            </div>
                         </div>
-                    </div>
-                </div>  
-            {% endfor %}
-
+                
+                {% endfor %}
+            </div>
         </div>
     </div>
+
+
+        
+    
+    <script src="{% static 'js/index.js' %}">
+        
+    </script>
     
 
 {% endblock %}

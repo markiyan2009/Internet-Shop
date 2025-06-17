@@ -1,7 +1,7 @@
 {% extends 'base.html' %}
 
 {% block content %}
-
+{% load static %}
 <div class="container">
 
     <div class="row text-center margin-20">
@@ -84,11 +84,7 @@
                                             
                                                     <h3>{{product.price}}<b>₴</b></h3>
                                                     <br>
-                                                    <div class="btn-group" role="group" aria-label="Basic example">
-                                                        <button type="button" class="btn border border-secondary number-border">-</button>
-                                                        <button type="button" id='number-product' class="btn btn-primary">1</button>
-                                                        <button type="button" class="btn border border-secondary number-border">+</button>
-                                                    </div>
+                                                    <p>You sure you want to add this product to basket?</p>
                                                     
                                                 </div>
                                             </div>
@@ -110,8 +106,9 @@
     </div>
 
     <!-- rewievs -->
-   <h1>Reviews</h1>
-   <div class="row">
+   
+   <div class="row" style="margin-top: 20px ;">
+        <h1>Reviews</h1>
         <div class="container">
 
             {% for review in reviews %}
@@ -119,10 +116,23 @@
 
                 <div class="container">
                     <div class="row">
-                        Raiting: {{review.rating}}
+                        <h3>{{review.user.username}}</h3>
                     </div>
                     <div class="row">
-                        <p>{{review.comment.text}}</p>
+                        <div class="col">
+                            <h5><span>Raiting:</span> {{review.rating}}/5</h5>
+                        </div>
+                    </div>
+                    <div class="row">
+                        <div class="col-11">
+                            <p style="font-size: 17px;">{{review.comment.text}}</p>
+                        </div>
+                        <div class="col">
+                            {% if review.user == request.user %}
+                                <a href="{% url 'delete_review' review.pk %}"><button class="btn btn-danger">Delete</button></a>
+                            {% endif %}
+                        </div>
+                       
                     </div>
                 </div>
                 
@@ -130,7 +140,11 @@
             {% endfor %}
             
             <div class="row">
-                <a href="{% url 'add_review' product.pk %}">Add review</a>
+                <div class="col-6" style="margin-top: 10px; margin-bottom: 20px;">
+                    <button class="btn btn-success" id="add-review" data-review-url="{% url 'add_review' product.pk %}" data-check-perm-url="{% url 'add_review_perm' product.pk %}">
+                        Add review
+                    </button>
+                </div>
             </div>
         </div>
 
@@ -140,8 +154,6 @@
 
 </div>
 
-<script>
-
-</script>
+<script src="{% static 'js/review.js' %}"></script>
 
 {% endblock %}

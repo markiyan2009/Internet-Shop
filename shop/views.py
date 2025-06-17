@@ -1,8 +1,9 @@
 from typing import Any, Dict
+from django.forms.models import BaseModelForm
 from django.shortcuts import render, redirect
 from django.urls import reverse, reverse_lazy
 from shop.models import * 
-from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, View
+from django.views.generic import ListView, DetailView, CreateView, DeleteView, UpdateView, View, TemplateView
 from django import http, template
 from shop.mixins import *
 from django.http import HttpRequest, HttpResponse, JsonResponse, HttpResponseRedirect
@@ -11,6 +12,7 @@ from . import forms
 from django import template
 from django.contrib.auth.decorators import permission_required
 from django.utils.decorators import method_decorator
+from cloudinary.uploader import upload, destroy
 
 
 
@@ -26,20 +28,43 @@ def zip_lists(a, b):
 def has_group(user, group_name):
     return user.groups.filter(name=group_name).exists()
 
-class HomeView(ListView):
-    model = Products
-    template_name = 'shop/home.html'
-    context_object_name = 'products'
+# class HomeView(ListView):
+#     model = Products
+#     template_name = 'shop/home.html'
+#     context_object_name = 'products'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
+#     def get_context_data(self, **kwargs):
+#         context = super().get_context_data(**kwargs)
 
+#         products = Products.objects.all()
+
+#         context['loops'] = len(products)
+#         products_images = []
+#         for product in products:
+            
+#             imgs = product.product_images.all()
+            
+#             for img in imgs:
+                
+#                 if img.is_primary:
+#                     products_images.append(img)
+                    
+#             print(products_images)
+
+#         # context['categories'] = Categories.objects.all()
+#         context['combined'] = zip_lists(products, products_images)
+        
+#         return context
+class HomeView(View):
+    def get(self, request):
+        context = {}
+        categories = Categories.objects.all()
         products = Products.objects.all()
-
+    
         context['loops'] = len(products)
         products_images = []
         for product in products:
-            
+            product.price =  product.formatted_price
             imgs = product.product_images.all()
             
             for img in imgs:
@@ -48,135 +73,45 @@ class HomeView(ListView):
                     products_images.append(img)
                     
             print(products_images)
-        context['combined'] = zip_lists(products, products_images)
-        
-        return context
-    
-class ProductDetailView(DetailView):
-    model = Products
-    template_name = 'shop/product-detail.html'
-    context_object_name = 'product'
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs) 
-
-        imgs = context['product'].product_images.all()
-        context['imgs'] = imgs
-        
-        context['product'].price = f'{context["product"].price:,}'.replace(',', ' ') 
-
-        context['reviews'] = context['product'].reviews.all()
-
-        
-
-        return context   
-    
-class BusketDetailView(PermissionRequiredMixin, DetailView):
-    permission_required = 'shop.view_baskets'
-    model = Baskets
-    template_name = 'shop/basket_detail.html'
-    context_object_name = 'basket'
-
-    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
-
-        context = super().get_context_data(**kwargs)
-
-        products = context['basket'].products.all()
-        print(products)
-        products_images = []
-        for product in products:
-            
-            imgs = product.product_images.all()
-            
-            for img in imgs:
-                
-                if img.is_primary:
-                    products_images.append(img)
-                    
-            
+        context['categories'] = categories
         context['combined'] = zip_lists(products, products_images)
 
-        return context
+        
 
-class AddProductToBusketView(PermissionRequiredMixin, View):
-    permission_required = 'shop.add_product_to_busket'
+
+        return render(request, 'shop/home.html', context=context)
     
-   
-    def get(self, request, pk, *args, **kwargs):
-        
-        basket = request.user.basket
-        
-        product = Products.objects.filter(pk = self.kwargs['pk']).first()
-        
-        basket.products.add(product)
-        
-        return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs={'pk' : basket.pk}))
+class HomeCategoriesView(View):
+    def get(self, request):
+        category_id = request.GET.get('category')
+        search_query = request.GET.get('search')
 
-class CreateOrderView(PermissionRequiredMixin, View):
-    permission_required = 'shop.add_orders'
+        products = Products.objects.all()
+
+        if category_id:
+            products = products.filter(category_id=category_id)
+
+        if search_query:
+            products = products.filter(name__icontains=search_query)
+
+        data = [
+            {
+                'name': item.name,
+                'pk': item.pk,
+                'price': item.formatted_price,
+                'availability': item.availability,
+                'character': item.character,
+                'description': item.description,
+                'image_url': item.product_images.filter(is_primary=True).first().image.url
+                    if item.product_images.filter(is_primary=True).exists() else ''
+            }
+            for item in products
+        ]
+
+        return JsonResponse({"results": data})
     
-    def get(self, request, *args, **kwargs):
-        basket = request.user.basket
-        products = basket.products.all()
-        quantity = 1
-        total_price = 0
-        
-        order = Orders(user = request.user)
-        order.save()
-        for product in products:
-            order_item = OrderItems(order = order, product = product, quantity = quantity)
-            order_item.save()
-            total_price += product.price * quantity
-            order.order_items.add(order_item)
-            
-        
-        order.total_price = total_price
-        order.save()
-        basket.products.clear()
-        
-        return HttpResponseRedirect(reverse_lazy('basket_detail', kwargs = {'pk':basket.pk}))
-        
-class OrdersListView(PermissionRequiredMixin, ListView):
-    permission_required = 'shop.view_orders'
-    template_name = 'shop/orders.html'
-    context_object_name = 'orders'
-    model = Orders
-        
-class OrderItemsListView(PermissionRequiredMixin, ListView):
-    permission_required = 'shop.view_orderitems'
-    model = OrderItems
-    template_name = 'shop/order_items.html'
-    context_object_name = 'order_items'
-
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        
-
-        order = Orders.objects.filter(pk = self.kwargs['order_pk']).first()
-        context['order'] = order
-
-        context['order_items'] = OrderItems.objects.filter(order = order).all()
-
-        products = []
-        for item in context['order_items']:
-            products.append(item.product)
-
-        
-        products_images = []
-        for product in products:
-            
-            imgs = product.product_images.all()
-            
-            for img in imgs:
-                
-                if img.is_primary:
-                    products_images.append(img)
-                    
-        
-        context['combined'] = zip_lists(products, products_images)
-
-        return context
+    
     
 class UpdateOrderStatusView(PermissionRequiredMixin, UpdateView):
     permission_required = 'shop.change_orders'
@@ -190,37 +125,123 @@ class UpdateOrderStatusView(PermissionRequiredMixin, UpdateView):
       
 
 
-class CreateReviewView(CreateView):
-    permission_required = 'shop.can_add_review'
-    form_class = forms.CreateReviewForm
-    model = Reviews
-    template_name = 'shop/create_review.html'
-    
 
-    def get_context_data(self, **kwargs):
-        context = super().get_context_data(**kwargs)
-
-        context['comment_form'] = forms.CreateCommentForm()
-
-        return context
-    def post(self, request, *args, **kwargs):
-        comment_form = forms.CreateCommentForm(request.POST, request.FILES)
-        review_form = forms.CreateReviewForm(request.POST, request.FILES)
-        if comment_form.is_valid() and review_form.is_valid():
-            comment = comment_form.save(commit=False)
-            review = review_form.save(commit=False)
-            
-            review.user = request.user
-            comment.author = request.user
-            review.product = Products.objects.filter(pk = self.kwargs['product_pk']).first()
-            review.comment = comment
-            comment.save()
-            review.save()
-
-        return redirect('product', pk = self.kwargs['product_pk'])
 
 class OrderListManagerView(PermissionRequiredMixin, ListView):
     permission_required = 'shop.change_orders'
     template_name = 'shop/orders_manager.html'
     model = Orders
     context_object_name = 'orders'  
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+        
+        colors = []
+        for order in context['orders']:
+            if order.status == 'received':
+                colors.append('rgb(0, 121, 1)')
+            elif order.status == 'canceled':
+                colors.append('red')
+            else:
+                colors.append('black')
+        
+        context['combined'] = zip(context['orders'], colors)
+        return context
+
+class ProductShopListView(ListView):
+    # permission_required = None
+    model = Products
+    context_object_name = 'products'
+    template_name = 'shop/products.html'
+
+    def get_context_data(self, **kwargs: Any) -> Dict[str, Any]:
+        context = super().get_context_data(**kwargs)
+
+        products = self.request.user.shop_profile.products.all()
+        
+        products_images = []
+        for product in products:
+            
+            imgs = product.product_images.all()
+            
+            for img in imgs:
+                
+                if img.is_primary:
+                    products_images.append(img)
+                    
+            
+        context['combined'] = zip_lists(products, products_images)
+
+    
+        return context
+    
+class ShopProductView(PermissionRequiredMixin, UpdateView):
+    permission_required = 'shop.change_products'
+    form_class = forms.UpdateProductForm
+    template_name = 'shop/product.html'
+    model = Products
+    success_url = reverse_lazy('shop_products')
+    
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        product = Products.objects.filter(pk = self.kwargs['pk']).first()
+        product_images = product.product_images.all()
+    
+        context['imgs'] = product_images
+        return context
+
+                
+class CreateDiscountView(CreateView):
+    model = Discounts
+    form_class = forms.CreateDiscountForm
+    template_name = 'shop/create_discount.html'
+    success_url = reverse_lazy('shop_products')
+
+    def form_valid(self, form):
+        product = Products.objects.filter(pk = self.kwargs['pk']).first()
+        form.instance.product = product
+        discount = form.save()
+        product.discount = discount
+        
+        product.save()
+        return super().form_valid(form)
+
+# class UpdateProductImagesView(UpdateView):
+#     permission_required = 'shop.change_productimages'
+#     model = ProductImages
+#     form_class = None
+
+
+@permission_required('shop.add_products')
+def create_product(request):
+    if request.method == 'POST':
+        form = forms.CreateProductForm(request.POST)
+        formset = forms.ProductImageFormSet(request.POST, request.FILES, prefix='images')
+        if form.is_valid() and formset.is_valid():
+            shop_profiles = ShopProfile.objects.all()
+            auth = request.user
+            form.instance.shop = auth.shop_profile
+            
+            product = form.save()
+            formset.instance = product
+            formset.save()
+            return redirect('shop_products')  # або інша твоя сторінка
+    else:
+        form = forms.CreateProductForm()
+        formset = forms.ProductImageFormSet(prefix='images')
+
+
+    return render(request, 'shop/create_product.html', {'form': form, 'formset': formset})
+
+class DeleteProductView(PermissionRequiredMixin, DeleteView):
+    permission_required = 'shop.delete_products'
+    model = Products
+    template_name = 'shop/delete_product.html'
+    success_url = reverse_lazy('shop_products')
+
+    def get_context_data(self, **kwargs) :
+        context = super().get_context_data(**kwargs)
+        context['product'] = Products.objects.filter(pk = self.kwargs['pk']).first()
+
+        return context
+    

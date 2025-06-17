@@ -2,24 +2,30 @@
 
 {% block content %}
     <div class="container">
-        {% for order in orders %}
+        {% for order, color in combined %}
         <div class="row">
-            <div class="container">
-                <div class="card">
+            <div class="card" style="margin-bottom: 10px;">
+                <h5 class="card-header">Номер замовлення</h5>
+                <div class="card-body">
+                    <h5 class="card-title" style="color:{{color}}">{{order.get_status_display}}</h5>
+                    <p > {{order.user.name}} </p>
+                    <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Змінити статус</a>
+                    
+                </div>
+              </div>
+                <!-- <div class="card">
                     <h5 class="card-header">Номер замовлення</h5></div>
 
                     <div class="card-body">
 
                     
-                    <h5 class="card-title">{{order.status}}</h5>
-                    <p class="card-text"> {{order.user.name}} </p>
-                    <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Змінити статус</a>
-                    {% if perms.shop.change_orders %}
-                        <!-- <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Оновити статус</a> -->
-                    {% endif %}
+                        <h5 class="card-title">{{order.status}}</h5>
+                        <p > {{order.user.name}} </p>
+                        <a href="{% url 'update_order_status' order.pk %}" class="btn btn-primary">Змінити статус</a>
+                        
                     </div>
-                </div>
-            </div>
+                </div> -->
+           
         </div>
 
         {% endfor %}

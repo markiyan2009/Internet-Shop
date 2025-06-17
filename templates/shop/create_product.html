@@ -1,0 +1,52 @@
+{% extends 'base.html' %}
+
+{% block content %}
+{% load static %}
+<div class="row">
+    <form method="post" enctype="multipart/form-data" id="product-form">
+        <div class="col-5">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <div id="image-formset">
+                {{ formset.management_form }}
+                {% for form in formset %}
+                    <div class="image-form">
+                        {{ form.as_p }}
+                    </div>
+                {% endfor %}
+            </div>
+            <div style="margin-bottom: 20px;">
+                <button type="button" id="add-image-btn" class="btn btn-warning" >Додати ще фото</button>
+                <button type="submit" class="btn btn-primary">Зберегти продукт</button>
+            </div>
+            
+        </div>
+    </form>
+
+</div>
+
+<script >
+    
+document.addEventListener("DOMContentLoaded", function () {
+    const addBtn = document.getElementById("add-image-btn");
+    const formsetContainer = document.getElementById("image-formset");
+
+    addBtn.addEventListener("click", function () {
+        const totalForms = document.getElementById("id_images-TOTAL_FORMS");
+        const formCount = parseInt(totalForms.value);
+        const newForm = formsetContainer.querySelector(".image-form").cloneNode(true);
+
+        // Оновлення індексів
+        newForm.innerHTML = newForm.innerHTML.replaceAll(`-${formCount - 1}-`, `-${formCount}-`);
+        const inputs = newForm.querySelectorAll('input');
+        inputs.forEach(input => {
+            input.value = '';  // очистити поля
+        });
+
+        formsetContainer.appendChild(newForm);
+        totalForms.value = formCount + 1;
+    });
+});
+</script>
+
+{% endblock %}
