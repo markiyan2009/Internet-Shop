@@ -38,7 +38,6 @@ if DEBUG:
     mimetypes.add_type("application/javascript", ".js", True)
 
 
-ALLOWED_HOSTS = []
 
 CACHES = {
     "default": {
