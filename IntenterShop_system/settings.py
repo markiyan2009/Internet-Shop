@@ -29,7 +29,7 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z)n(7uwpbf5ab^#1(7&vx)2nqe42(r&8-=i(bfhojqpg=-0kzw')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = os.environ.get('DEBUG', True)
+DEBUG = os.environ.get('DEBUG', 'True').lower() in ('true', '1', 'yes')
 ALLOWED_HOST = '.onrender.com'
 ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS','127.0.0.1'), os.environ.get('ALLOWED_HOSTS', '127.0.0.2') ]
 import mimetypes
