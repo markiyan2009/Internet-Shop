@@ -28,5 +28,6 @@ urlpatterns = [
     path('shop/', include('shop.urls')),
     path('auth/', include('users_sys.urls')),
     path('customer/', include('customer.urls')),
-     path('__debug__/', include(debug_toolbar.urls)),
+    
+    
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 
