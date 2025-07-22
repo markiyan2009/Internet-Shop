@@ -19,8 +19,9 @@ from django.urls import path, include
 from shop.views import HomeView
 from django.conf.urls.static import static
 from . import settings
-import debug_toolbar
+
 from django.views.decorators.cache import cache_page
+from IntenterShop_system.settings import DEBUG
 
 urlpatterns = [
     path('' , (cache_page(60*2))(HomeView.as_view()), name='home'),
@@ -31,3 +32,7 @@ urlpatterns = [
     
     
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT) 
+
+if DEBUG:
+    import debug_toolbar
+    urlpatterns += [path('__debug__/', include(debug_toolbar.urls))]
