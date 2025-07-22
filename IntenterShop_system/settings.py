@@ -13,6 +13,10 @@ https://docs.djangoproject.com/en/5.1/ref/settings/
 from pathlib import Path
 import os
 from environ import Env
+import mimetypes
+mimetypes.add_type("application/javascript", ".js", True)
+
+
 
 # Build paths inside the project like this: BASE_DIR / 'subdir'.
 BASE_DIR = Path(__file__).resolve().parent.parent
@@ -22,10 +26,17 @@ BASE_DIR = Path(__file__).resolve().parent.parent
 # See https://docs.djangoproject.com/en/5.1/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-SECRET_KEY = 'django-insecure-z)n(7uwpbf5ab^#1(7&vx)2nqe42(r&8-=i(bfhojqpg=-0kzw'
+SECRET_KEY = os.environ.get('SECRET_KEY', 'django-insecure-z)n(7uwpbf5ab^#1(7&vx)2nqe42(r&8-=i(bfhojqpg=-0kzw')
 
 # SECURITY WARNING: don't run with debug turned on in production!
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', True)
+ALLOWED_HOST = '.onrender.com'
+ALLOWED_HOSTS = [os.environ.get('ALLOWED_HOSTS','127.0.0.1'), os.environ.get('ALLOWED_HOSTS', '127.0.0.2') ]
+import mimetypes
+if DEBUG:
+    
+    mimetypes.add_type("application/javascript", ".js", True)
+
 
 ALLOWED_HOSTS = []
 
